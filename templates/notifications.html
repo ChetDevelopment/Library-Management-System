@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notifications - LibraryPNC</title>
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@4.7.0/fonts/remixicon.css" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/static/css/notifications.css">
+</head>
+
+<body>
+    <main>
+        <div class="container">
+            <div class="page-header">
+                <h1 class="page-title">
+                    <i class="ri-notification-3-line"></i>
+                    Notifications
+                </h1>
+                <div class="page-actions">
+                    <button class="btn btn-primary" id="mark-all-read">
+                        <i class="ri-check-double-line"></i> Mark All as Read
+                    </button>
+                    <button class="btn btn-outline" id="refresh-btn">
+                        <i class="ri-refresh-line"></i> Refresh
+                    </button>
+                </div>
+            </div>
+
+            <div class="notifications-container">
+                <div class="notification-header">
+                    <h2 class="notification-title">Your Notifications</h2>
+                    <div class="notification-stats">
+                        <div class="stat-badge">
+                            <i class="ri-notification-line"></i>
+                            <span id="total-count">{{ notifications|length if notifications else 0 }}</span> Total
+                        </div>
+                        <div class="stat-badge">
+                            <i class="ri-eye-line"></i>
+                            <span id="unread-count">
+                                {% if notifications %}
+                                    {{ notifications|selectattr("seen", "equalto", false)|list|length }}
+                                {% else %}
+                                    0
+                                {% endif %}
+                            </span> Unread
+                        </div>
+                    </div>
+                </div>
+
+                <div class="notification-list">
+                    {% if notifications %}
+                        {% for note in notifications %}
+                            <div class="notification-item {{ 'seen' if note.seen else 'unseen' }}" data-id="{{ note.id }}">
+                                <div class="notification-content">
+                                    <div class="notification-message">{{ note.message }}</div>
+                                    <div class="notification-time">
+                                        <i class="ri-time-line"></i>
+                                        {{ note.timestamp.strftime('%Y-%m-%d %H:%M') if note.timestamp else 'Recently' }}
+                                    </div>
+                                </div>
+                                <div class="notification-actions">
+                                    {% if not note.seen %}
+                                        <form action="{{ url_for('mark_seen', notification_id=note.id) }}" method="POST" class="mark-form">
+                                            <button type="submit" class="mark-seen-btn">
+                                                <i class="ri-check-line"></i> Mark as Read
+                                            </button>
+                                        </form>
+                                    {% endif %}
+                                    <button class="delete-btn" data-id="{{ note.id }}">
+                                        <i class="ri-delete-bin-line"></i> Delete
+                                    </button>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="empty-state">
+                            <i class="ri-notification-off-line"></i>
+                            <h3>No Notifications</h3>
+                            <p>You're all caught up! You don't have any notifications at the moment.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Refresh button functionality
+            const refreshBtn = document.getElementById('refresh-btn');
+            refreshBtn.addEventListener('click', function() {
+                this.classList.add('loading');
+                this.innerHTML = '<i class="ri-loader-4-line"></i> Refreshing...';
+                
+                // Simulate API call
+                setTimeout(() => {
+                    this.classList.remove('loading');
+                    this.innerHTML = '<i class="ri-refresh-line"></i> Refresh';
+                    
+                    // Show a temporary success message
+                    this.innerHTML = '<i class="ri-check-line"></i> Refreshed!';
+                    
+                    setTimeout(() => {
+                        this.innerHTML = '<i class="ri-refresh-line"></i> Refresh';
+                    }, 2000);
+                    
+                    // In a real app, this would reload notifications
+                    // window.location.reload();
+                }, 1500);
+            });
+
+            // Mark all as read functionality
+            const markAllBtn = document.getElementById('mark-all-read');
+            markAllBtn.addEventListener('click', function() {
+                const unreadNotifications = document.querySelectorAll('.notification-item.unseen');
+                
+                if (unreadNotifications.length === 0) {
+                    // Show message if no unread notifications
+                    showToast('All notifications are already marked as read', 'info');
+                    return;
+                }
+                
+                // Show confirmation
+                if (confirm(`Mark all ${unreadNotifications.length} notifications as read?`)) {
+                    // Simulate API call for each unread notification
+                    unreadNotifications.forEach(notification => {
+                        const form = notification.querySelector('.mark-form');
+                        if (form) {
+                            // In a real app, we would submit the form or make an API call
+                            // For demo purposes, we'll just update the UI
+                            
+                            // Remove the mark as read button
+                            const markBtn = notification.querySelector('.mark-seen-btn');
+                            if (markBtn) markBtn.remove();
+                            
+                            // Update notification style
+                            notification.classList.remove('unseen');
+                            notification.classList.add('seen');
+                            
+                            // Update border color
+                            notification.style.borderLeftColor = 'var(--text-light)';
+                        }
+                    });
+                    
+                    // Update unread count
+                    updateUnreadCount();
+                    
+                    // Show success message
+                    showToast(`Marked ${unreadNotifications.length} notifications as read`, 'success');
+                }
+            });
+
+            // Delete notification functionality
+            const deleteButtons = document.querySelectorAll('.delete-btn');
+            deleteButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const notificationId = this.getAttribute('data-id');
+                    const notification = this.closest('.notification-item');
+                    const notificationMessage = notification.querySelector('.notification-message').textContent;
+                    
+                    // Show confirmation
+                    if (confirm(`Delete this notification?\n"${notificationMessage}"`)) {
+                        // In a real app, we would make an API call to delete the notification
+                        // For demo purposes, we'll just remove it from the UI
+                        
+                        // Add fade out animation
+                        notification.style.opacity = '0';
+                        notification.style.transform = 'translateX(100px)';
+                        
+                        setTimeout(() => {
+                            notification.remove();
+                            
+                            // Update counts
+                            updateTotalCount();
+                            updateUnreadCount();
+                            
+                            // Check if all notifications are gone
+                            const remainingNotifications = document.querySelectorAll('.notification-item');
+                            if (remainingNotifications.length === 0) {
+                                // Show empty state
+                                showEmptyState();
+                            }
+                            
+                            // Show success message
+                            showToast('Notification deleted', 'success');
+                        }, 300);
+                    }
+                });
+            });
+
+            // Helper functions
+            function updateTotalCount() {
+                const totalCount = document.querySelectorAll('.notification-item').length;
+                document.getElementById('total-count').textContent = totalCount;
+            }
+            
+            function updateUnreadCount() {
+                const unreadCount = document.querySelectorAll('.notification-item.unseen').length;
+                document.getElementById('unread-count').textContent = unreadCount;
+            }
+            
+            function showEmptyState() {
+                const notificationList = document.querySelector('.notification-list');
+                notificationList.innerHTML = `
+                    <div class="empty-state">
+                        <i class="ri-notification-off-line"></i>
+                        <h3>No Notifications</h3>
+                        <p>You're all caught up! You don't have any notifications at the moment.</p>
+                    </div>
+                `;
+            }
+            
+            function showToast(message, type) {
+                // Create toast element
+                const toast = document.createElement('div');
+                toast.className = `toast toast-${type}`;
+                toast.innerHTML = `
+                    <div class="toast-content">
+                        <i class="ri-${type === 'success' ? 'check' : 'information'}-line"></i>
+                        <span>${message}</span>
+                    </div>
+                `;
+                
+                // Add styles for toast
+                toast.style.cssText = `
+                    position: fixed;
+                    bottom: 20px;
+                    right: 20px;
+                    background: ${type === 'success' ? 'var(--success)' : 'var(--warning)'};
+                    color: white;
+                    padding: 12px 20px;
+                    border-radius: 10px;
+                    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+                    z-index: 1000;
+                    display: flex;
+                    align-items: center;
+                    gap: 10px;
+                    font-weight: 500;
+                    animation: slideInRight 0.3s ease;
+                `;
+                
+                // Add to page
+                document.body.appendChild(toast);
+                
+                // Remove after 3 seconds
+                setTimeout(() => {
+                    toast.style.animation = 'slideOutRight 0.3s ease';
+                    setTimeout(() => {
+                        document.body.removeChild(toast);
+                    }, 300);
+                }, 3000);
+                
+                // Add keyframes for animation
+                if (!document.getElementById('toast-animations')) {
+                    const style = document.createElement('style');
+                    style.id = 'toast-animations';
+                    style.textContent = `
+                        @keyframes slideInRight {
+                            from { transform: translateX(100%); opacity: 0; }
+                            to { transform: translateX(0); opacity: 1; }
+                        }
+                        @keyframes slideOutRight {
+                            from { transform: translateX(0); opacity: 1; }
+                            to { transform: translateX(100%); opacity: 0; }
+                        }
+                    `;
+                    document.head.appendChild(style);
+                }
+            }
+        });
+    </script>
+</body>
+
+</html>

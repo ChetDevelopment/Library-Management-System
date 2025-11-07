@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Profile - LibraryPNC</title>
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@4.7.0/fonts/remixicon.css" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/static/css/view_profile.css">
+</head>
+
+<body>
+    <div class="profile-container">
+        <div class="profile-card">
+            <div class="profile-header">
+                <img src="{{ user_avatar_url or 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&q=80' }}" 
+                     alt="User Avatar" class="profile-avatar">
+                <h2 class="profile-name">{{ user[0] }}</h2>
+                <span class="profile-role">Library Member</span>
+            </div>
+
+            <div class="profile-info">
+                <div class="info-item">
+                    <div class="info-label">
+                        <i class="ri-user-line"></i>
+                        Full Name
+                    </div>
+                    <div class="info-value">{{ user[0] }}</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">
+                        <i class="ri-mail-line"></i>
+                        Email Address
+                    </div>
+                    <div class="info-value">{{ user[1] }}</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">
+                        <i class="ri-id-card-line"></i>
+                        ID Card Number
+                    </div>
+                    <div class="info-value">{{ user[2] }}</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">
+                        <i class="ri-calendar-line"></i>
+                        Member Since
+                    </div>
+                    <div class="info-value">January 2023</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">
+                        <i class="ri-shield-check-line"></i>
+                        Account Status
+                    </div>
+                    <div class="info-value" style="color: var(--success);">Active</div>
+                </div>
+            </div>
+
+            <div class="profile-actions">
+                <a href="{{ url_for('edit_profile') }}" class="btn btn-primary">
+                    <i class="ri-edit-line"></i> Edit Profile
+                </a>
+                <a href="{{ url_for('dashboard') }}" class="btn btn-outline">
+                    <i class="ri-arrow-left-line"></i> Back to Dashboard
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add a subtle hover effect to the profile card
+            const profileCard = document.querySelector('.profile-card');
+            
+            profileCard.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-5px)';
+                this.style.boxShadow = '0 25px 80px rgba(0, 0, 0, 0.15)';
+            });
+            
+            profileCard.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(0)';
+                this.style.boxShadow = '0 20px 60px rgba(0, 0, 0, 0.1)';
+            });
+        });
+    </script>
+</body>
+
+</html>

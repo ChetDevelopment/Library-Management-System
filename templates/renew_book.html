@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Renew Book - LibraryPNC</title>
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@4.7.0/fonts/remixicon.css" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/static/css/renew.css">
+</head>
+
+<body>
+    <header>
+        <div class="header-left">
+            <h3>Library</h3>
+            <h3 class="pnc">PNC</h3>
+        </div>
+        <div class="header-right">
+            <ul>
+                <li>
+                    <i class="ri-home-4-line"></i>
+                    <a href="{{ url_for('home') }}">Home</a>
+                </li>
+                <li>
+                    <i class="ri-admin-line"></i>
+                    <a href="{{ url_for('admin_login') }}">Admin</a>
+                </li>
+                <li>
+                    <i class="ri-user-add-line"></i>
+                    <a href="{{ url_for('register') }}">Register</a>
+                </li>
+                <li>
+                    <i class="ri-login-box-line"></i>
+                    <a href="{{ url_for('login') }}">Login</a>
+                </li>
+            </ul>
+        </div>
+    </header>
+
+    <main>
+        <div class="renew-container">
+            <div class="renew-card">
+                <div class="renew-header">
+                    <div class="renew-icon">
+                        <i class="ri-refresh-line"></i>
+                    </div>
+                    <h2>Renew Book</h2>
+                    <p>Extend your borrowing period</p>
+                </div>
+
+                <div class="book-info">
+                    <div class="book-title">{{ book_title }}</div>
+                    <div class="date-info">
+                        <div class="date-item">
+                            <div class="date-label">
+                                <i class="ri-calendar-event-line"></i>
+                                Current Due Date
+                            </div>
+                            <div class="date-value current-date">{{ current_due_date }}</div>
+                        </div>
+                        <div class="date-item">
+                            <div class="date-label">
+                                <i class="ri-calendar-check-line"></i>
+                                New Due Date
+                            </div>
+                            <div class="date-value new-date">{{ new_due_date }}</div>
+                        </div>
+                    </div>
+                    <div class="extension-info">
+                        <i class="ri-information-line"></i>
+                        <div class="extension-text">
+                            <strong>Extension:</strong> 14 days from today
+                        </div>
+                    </div>
+                </div>
+
+                <div class="alert alert-info">
+                    <i class="ri-information-line"></i>
+                    <div>
+                        <strong>Renewal Information</strong><br>
+                        Renewing will extend the due date by 14 days from today. 
+                        You can renew a book up to 2 times.
+                    </div>
+                </div>
+
+                <form method="POST" id="renew-form">
+                    <button type="submit" class="btn btn-success" id="submit-btn">
+                        <i class="ri-refresh-line"></i> Confirm Renewal
+                    </button>
+                    <a href="{{ url_for('dashboard') }}" class="btn btn-outline">
+                        <i class="ri-arrow-left-line"></i> Back to Dashboard
+                    </a>
+                </form>
+            </div>
+        </div>
+    </main>
+
+    <!-- Enhanced JavaScript -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.getElementById('renew-form');
+            const submitBtn = document.getElementById('submit-btn');
+
+            // Form submission
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                // Show loading state
+                submitBtn.disabled = true;
+                submitBtn.classList.add('loading');
+                submitBtn.innerHTML = 'Processing Renewal...';
+                
+                // Simulate API call
+                setTimeout(() => {
+                    // Create success message
+                    const successMessage = document.createElement('div');
+                    successMessage.className = 'alert alert-success';
+                    successMessage.innerHTML = `
+                        <i class="ri-checkbox-circle-line"></i>
+                        <div>
+                            <h4>Book Renewed Successfully!</h4>
+                            <p>Your book has been renewed. The new due date is <strong>{{ new_due_date }}</strong>.</p>
+                        </div>
+                    `;
+                    
+                    // Style the success message
+                    successMessage.style.cssText = `
+                        background: rgba(76, 201, 240, 0.1);
+                        color: #0c5460;
+                        border: 1px solid rgba(76, 201, 240, 0.2);
+                        padding: 16px;
+                        border-radius: 12px;
+                        margin-bottom: 20px;
+                        display: flex;
+                        align-items: flex-start;
+                        gap: 10px;
+                        animation: fadeInUp 0.5s ease;
+                    `;
+                    
+                    // Insert before the form
+                    form.parentNode.insertBefore(successMessage, form);
+                    
+                    // Update the book info to show renewed status
+                    const currentDateElement = document.querySelector('.current-date');
+                    const newDateElement = document.querySelector('.new-date');
+                    
+                    if (currentDateElement && newDateElement) {
+                        currentDateElement.textContent = newDateElement.textContent;
+                        currentDateElement.classList.remove('current-date');
+                        currentDateElement.classList.add('new-date');
+                        
+                        // Add renewed badge
+                        const bookTitle = document.querySelector('.book-title');
+                        if (bookTitle) {
+                            const renewedBadge = document.createElement('span');
+                            renewedBadge.textContent = 'Renewed';
+                            renewedBadge.style.cssText = `
+                                background: var(--success);
+                                color: white;
+                                padding: 4px 10px;
+                                border-radius: 20px;
+                                font-size: 12px;
+                                font-weight: 600;
+                                margin-left: 10px;
+                            `;
+                            bookTitle.appendChild(renewedBadge);
+                        }
+                    }
+                    
+                    // Update the button to show completed state
+                    submitBtn.disabled = true;
+                    submitBtn.classList.remove('loading');
+                    submitBtn.innerHTML = '<i class="ri-check-line"></i> Successfully Renewed';
+                    submitBtn.style.background = 'var(--success)';
+                    
+                    // Add a button to go back to dashboard
+                    const backButton = document.createElement('a');
+                    backButton.href = "{{ url_for('dashboard') }}";
+                    backButton.className = 'btn btn-primary';
+                    backButton.innerHTML = '<i class="ri-home-4-line"></i> Back to Dashboard';
+                    backButton.style.marginTop = '15px';
+                    backButton.style.width = '100%';
+                    
+                    form.appendChild(backButton);
+                }, 2000);
+            });
+
+            // Keyboard shortcuts
+            document.addEventListener('keydown', function(e) {
+                // Enter to submit form
+                if (e.key === 'Enter' && !submitBtn.disabled) {
+                    form.dispatchEvent(new Event('submit'));
+                }
+                
+                // Escape to cancel
+                if (e.key === 'Escape') {
+                    window.location.href = "{{ url_for('dashboard') }}";
+                }
+            });
+
+            // Add styles for success message
+            const style = document.createElement('style');
+            style.textContent = `
+                .alert-success {
+                    background: rgba(76, 201, 240, 0.1);
+                    color: #0c5460;
+                    border: 1px solid rgba(76, 201, 240, 0.2);
+                }
+                .alert-success h4 {
+                    margin: 0 0 5px 0;
+                    font-size: 16px;
+                }
+                .alert-success p {
+                    margin: 0;
+                    font-size: 14px;
+                }
+            `;
+            document.head.appendChild(style);
+        });
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Settings - LibraryPNC</title>
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@4.3.0/fonts/remixicon.css" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/setting.css">
+</head>
+
+<body>
+    <main>
+        <div class="container">
+            <div class="page-header">
+                <h1 class="page-title">
+                    <i class="ri-settings-3-line"></i>
+                    Admin Settings
+                </h1>
+                <div class="page-actions">
+                    <button class="btn btn-primary" id="reset-btn">
+                        <i class="ri-refresh-line"></i> Reset to Defaults
+                    </button>
+                    <button class="btn btn-outline" id="back-btn">
+                        <i class="ri-arrow-left-line"></i> Back to Admin
+                    </button>
+                </div>
+            </div>
+
+            {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+            {% for category, message in messages %}
+            <div class="toast toast-{{ category }}">
+                <div class="toast-content">
+                    <i class="ri-{{ 'check' if category == 'success' else 'alert' }}-line"></i>
+                    <span>{{ message }}</span>
+                </div>
+            </div>
+            {% endfor %}
+            {% endif %}
+            {% endwith %}
+
+            <div class="settings-container">
+                <div class="settings-header">
+                    <div class="settings-icon">
+                        <i class="ri-settings-3-line"></i>
+                    </div>
+                    <h2>System Configuration</h2>
+                    <p>Manage library policies and operational settings</p>
+                </div>
+
+                <div class="settings-tabs">
+                    <div class="tab active" data-tab="borrowing">Borrowing Rules</div>
+                    <div class="tab" data-tab="operational">Operational Hours</div>
+                </div>
+
+                <form method="POST" id="settings-form" action="{{ url_for('settings') }}">
+                    <div class="settings-section active" id="borrowing-section">
+                        <div class="setting-card">
+                            <h3><i class="ri-calendar-line"></i> Borrowing Period</h3>
+                            <p class="setting-description">Set the maximum number of days a book can be borrowed.</p>
+                            <div class="form-group">
+                                <label for="max_borrow_days">Maximum Borrow Days</label>
+                                <div class="input-with-icon">
+                                    <i class="ri-calendar-line"></i>
+                                    <input type="number" name="max_borrow_days" id="max_borrow_days"
+                                        class="form-control" value="{{ settings.max_borrow_days }}" min="1" max="90"
+                                        required>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="setting-card">
+                            <h3><i class="ri-money-dollar-circle-line"></i> Fine Policy</h3>
+                            <p class="setting-description">Set the daily fine amount for overdue books.</p>
+                            <div class="form-group">
+                                <label for="fine_per_day">Fine per Day ($)</label>
+                                <div class="input-with-icon">
+                                    <i class="ri-money-dollar-circle-line"></i>
+                                    <input type="number" name="fine_per_day" id="fine_per_day" class="form-control"
+                                        value="{{ settings.fine_per_day }}" min="0" max="10" step="0.01" required>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="settings-section" id="operational-section">
+                        <div class="setting-card">
+                            <h3><i class="ri-time-line"></i> Operating Hours</h3>
+                            <p class="setting-description">Set the library's opening and closing times.</p>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="open_time">Library Open Time</label>
+                                    <div class="input-with-icon">
+                                        <i class="ri-time-line"></i>
+                                        <input type="time" name="open_time" id="open_time" class="form-control"
+                                            value="{{ settings.open_time }}" required>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="close_time">Library Close Time</label>
+                                    <div class="input-with-icon">
+                                        <i class="ri-time-line"></i>
+                                        <input type="time" name="close_time" id="close_time" class="form-control"
+                                            value="{{ settings.close_time }}" required>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="setting-card">
+                            <h3><i class="ri-mail-line"></i> Contact Information</h3>
+                            <p class="setting-description">Set the primary contact email for library communications.</p>
+                            <div class="form-group">
+                                <label for="contact_email">Contact Email</label>
+                                <div class="input-with-icon">
+                                    <i class="ri-mail-line"></i>
+                                    <input type="email" name="contact_email" id="contact_email" class="form-control"
+                                        value="{{ settings.contact_email }}" required>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn-save" id="save-btn">
+                        <i class="ri-save-line"></i> Save All Settings
+                    </button>
+                </form>
+            </div>
+
+            <p class="footer-text">LibraryPNC Admin Panel © 2025</p>
+        </div>
+    </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Tab functionality
+            const tabs = document.querySelectorAll('.tab');
+            const sections = document.querySelectorAll('.settings-section');
+
+            tabs.forEach(tab => {
+                tab.addEventListener('click', function () {
+                    tabs.forEach(t => t.classList.remove('active'));
+                    sections.forEach(s => s.classList.remove('active'));
+                    this.classList.add('active');
+                    document.getElementById(`${this.getAttribute('data-tab')}-section`).classList.add('active');
+                });
+            });
+
+            // Reset to defaults
+            const resetBtn = document.getElementById('reset-btn');
+            resetBtn.addEventListener('click', async function () {
+                if (confirm('Are you sure you want to reset all settings to default values?')) {
+                    this.classList.add('loading');
+                    this.innerHTML = 'Resetting...';
+                    try {
+                        const response = await fetch('/settings/reset', { method: 'POST' });
+                        if (!response.ok) throw new Error('Reset failed');
+                        window.location.reload();
+                    } catch (error) {
+                        console.error('Reset error:', error);
+                        showToast('Failed to reset settings', 'danger');
+                        this.classList.remove('loading');
+                        this.innerHTML = '<i class="ri-refresh-line"></i> Reset to Defaults';
+                    }
+                }
+            });
+
+            // Form submission
+            const form = document.getElementById('settings-form');
+            const saveBtn = document.getElementById('save-btn');
+            form.addEventListener('submit', async function (e) {
+                e.preventDefault();
+                saveBtn.disabled = true;
+                saveBtn.classList.add('loading');
+                try {
+                    const response = await fetch('/settings', {
+                        method: 'POST',
+                        body: new FormData(form)
+                    });
+                    if (!response.ok) throw new Error('Save failed');
+                    window.location.reload();
+                } catch (error) {
+                    console.error('Save error:', error);
+                    showToast('Failed to save settings', 'danger');
+                    saveBtn.disabled = false;
+                    saveBtn.classList.remove('loading');
+                    saveBtn.innerHTML = '<i class="ri-save-line"></i> Save All Settings';
+                }
+            });
+
+            // Back button
+            document.getElementById('back-btn').addEventListener('click', function () {
+                window.location.href = "{{ url_for('admin_dashboard') }}";
+            });
+
+            // Input validation
+            const maxBorrowDays = document.getElementById('max_borrow_days');
+            const finePerDay = document.getElementById('fine_per_day');
+
+            maxBorrowDays.addEventListener('input', function () {
+                if (this.value < 1) this.value = 1;
+                if (this.value > 90) this.value = 90;
+            });
+
+            finePerDay.addEventListener('input', function () {
+                if (this.value < 0) this.value = 0;
+                if (this.value > 10) this.value = 10;
+            });
+
+            // Toast notifications
+            function showToast(message, type) {
+                const toast = document.createElement('div');
+                toast.className = `toast toast-${type}`;
+                toast.innerHTML = `
+                    <div class="toast-content">
+                        <i class="ri-${type === 'success' ? 'check' : 'alert'}-line"></i>
+                        <span>${message}</span>
+                    </div>
+                `;
+                toast.style.cssText = `
+                    position: fixed;
+                    bottom: 20px;
+                    right: 20px;
+                    background: ${type === 'success' ? '#28a745' : '#dc3545'};
+                    color: white;
+                    padding: 12px 20px;
+                    border-radius: 10px;
+                    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+                    z-index: 1000;
+                    display: flex;
+                    align-items: center;
+                    gap: 10px;
+                    font-weight: 500;
+                    animation: slideInRight 0.3s ease;
+                `;
+                document.body.appendChild(toast);
+                setTimeout(() => {
+                    toast.style.animation = 'slideOutRight 0.3s ease';
+                    setTimeout(() => toast.remove(), 300);
+                }, 3000);
+            }
+
+            // Show flashed messages as toasts
+            document.querySelectorAll('.toast').forEach(toast => {
+                setTimeout(() => {
+                    toast.style.animation = 'slideOutRight 0.3s ease';
+                    setTimeout(() => toast.remove(), 300);
+                }, 3000);
+            });
+
+            // Add toast animations
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes slideInRight {
+                    from { transform: translateX(100%); opacity: 0; }
+                    to { transform: translateX(0); opacity: 1; }
+                }
+                @keyframes slideOutRight {
+                    from { transform: translateX(0); opacity: 1; }
+                    to { transform: translateX(100%); opacity: 0; }
+                }
+            `;
+            document.head.appendChild(style);
+        });
+        resetBtn.addEventListener('click', async function () {
+            if (confirm('Are you sure you want to reset all settings to default values?')) {
+                this.classList.add('loading');
+                this.innerHTML = 'Resetting...';
+                try {
+                    const response = await fetch('/settings/reset', {
+                        method: 'POST'
+                    });
+                    if (!response.ok) {
+                        const errorText = await response.text();
+                        console.error('Server response:', errorText);
+                        throw new Error('Reset failed');
+                    }
+                    window.location.reload();
+                } catch (error) {
+                    console.error('Reset error:', error);
+                    showToast('Failed to reset settings', 'danger');
+                    this.classList.remove('loading');
+                    this.innerHTML = '<i class="ri-refresh-line"></i> Reset to Defaults';
+                }
+            }
+        });
+    </script>
+</body>
+
+</html>

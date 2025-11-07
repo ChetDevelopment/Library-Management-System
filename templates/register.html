@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LibraryPNC - Register</title>
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@4.7.0/fonts/remixicon.css" rel="stylesheet" />
+    <link rel="stylesheet" href="/static/css/register.css">
+</head>
+
+<body>
+    <header>
+        <div class="header-left">
+            <h3>Library</h3>
+            <h3 class="pnc">PNC</h3>
+        </div>
+        <div class="header-right">
+            <ul>
+                <li><i class="ri-home-4-line"></i><a href="{{ url_for('home') }}">Home</a></li>
+                <li><i class="ri-admin-line"></i><a href="{{ url_for('admin_login') }}">Admin Login</a></li>
+                <li><i class="ri-user-add-line"></i><a href="{{ url_for('register') }}">Register</a></li>
+                <li><i class="ri-login-box-line"></i><a href="{{ url_for('login') }}">Login</a></li>
+            </ul>
+        </div>
+    </header>
+
+    <main>
+        <div class="login-container">
+            <div class="login-card">
+                <div class="login-header">
+                    <div class="login-icon">
+                        <i class="ri-user-add-line"></i>
+                    </div>
+                    <h2>Create Account</h2>
+                    <p>Join our library community</p>
+                </div>
+
+                {% with messages = get_flashed_messages() %}
+                {% if messages %}
+                <div class="flash">
+                    <div class="alert alert-danger">
+                        <i class="ri-error-warning-line"></i>
+                        {{ messages[0] }}
+                    </div>
+                </div>
+                {% endif %}
+                {% endwith %}
+
+                <form id="register-form" method="POST" onsubmit="return checkPasswords()">
+                    {{ form.hidden_tag() }}
+
+                    <div class="form-group">
+                        {{ form.name.label(for='name') }}
+                        <div class="input-with-icon">
+                            <i class="ri-user-line"></i>
+                            {{ form.name(class="form-control", placeholder="Enter full name", id="name") }}
+                        </div>
+                        {% for error in form.name.errors %}
+                        <div class="error-message">
+                            <i class="ri-error-warning-line"></i>
+                            {{ error }}
+                        </div>
+                        {% endfor %}
+                    </div>
+
+                    <div class="form-group">
+                        {{ form.email.label(for='email') }}
+                        <div class="input-with-icon">
+                            <i class="ri-mail-line"></i>
+                            {{ form.email(class="form-control", placeholder="Enter email", id="email") }}
+                        </div>
+                        {% for error in form.email.errors %}
+                        <div class="error-message">
+                            <i class="ri-error-warning-line"></i>
+                            {{ error }}
+                        </div>
+                        {% endfor %}
+                    </div>
+
+                    <div class="form-group">
+                        {{ form.id_card.label(for='id_card') }}
+                        <div class="input-with-icon">
+                            <i class="ri-id-card-line"></i>
+                            {{ form.id_card(class="form-control", placeholder="Enter ID card number", id="id_card") }}
+                        </div>
+                        {% for error in form.id_card.errors %}
+                        <div class="error-message">
+                            <i class="ri-error-warning-line"></i>
+                            {{ error }}
+                        </div>
+                        {% endfor %}
+                    </div>
+
+                    <div class="form-group">
+                        {{ form.password.label(for='password') }}
+                        <div class="input-with-icon">
+                            <i class="ri-lock-line"></i>
+                            {{ form.password(class="form-control", id="password", placeholder="Enter password") }}
+                            <i class="ri-eye-line password-toggle" onclick="togglePassword('password', this)"></i>
+                        </div>
+                        {% for error in form.password.errors %}
+                        <div class="error-message">
+                            <i class="ri-error-warning-line"></i>
+                            {{ error }}
+                        </div>
+                        {% endfor %}
+                    </div>
+
+                    <div class="form-group">
+                        <label for="confirm_password">Confirm Password</label>
+                        <div class="input-with-icon">
+                            <i class="ri-lock-line"></i>
+                            <input type="password" class="form-control" id="confirm_password"
+                                placeholder="Confirm password">
+                            <i class="ri-eye-line password-toggle"
+                                onclick="togglePassword('confirm_password', this)"></i>
+                        </div>
+                        <div id="confirm_error" class="error-message" style="display: none;"></div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary" id="submit-btn">
+                        <i class="ri-user-add-line"></i>
+                        {{ form.submit.label.text or 'Create Account' }}
+                    </button>
+                </form>
+
+                <div class="login-footer">
+                    <p>Already have an account? <a href="{{ url_for('login') }}">Sign in here</a></p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const form = document.getElementById('register-form');
+            const submitBtn = document.getElementById('submit-btn');
+
+            // Form submission
+            if (form) {
+                form.addEventListener('submit', function (e) {
+                    // Show loading state
+                    if (submitBtn) {
+                        submitBtn.disabled = true;
+                        submitBtn.classList.add('loading');
+                        submitBtn.innerHTML = 'Creating Account...';
+                    }
+
+                    // Form will submit normally if checkPasswords returns true
+                });
+            }
+
+            // Keyboard shortcuts
+            document.addEventListener('keydown', function (e) {
+                // Ctrl+Enter to submit form
+                if (e.ctrlKey && e.key === 'Enter') {
+                    if (form) {
+                        form.dispatchEvent(new Event('submit'));
+                    }
+                }
+            });
+        });
+
+        // Toggle password visibility
+        function togglePassword(fieldId, icon) {
+            const input = document.getElementById(fieldId);
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.classList.remove('ri-eye-line');
+                icon.classList.add('ri-eye-off-line');
+            } else {
+                input.type = 'password';
+                icon.classList.remove('ri-eye-off-line');
+                icon.classList.add('ri-eye-line');
+            }
+        }
+
+        // Check if passwords match
+        function checkPasswords() {
+            const password = document.getElementById('password').value;
+            const confirm = document.getElementById('confirm_password').value;
+            const errorDiv = document.getElementById('confirm_error');
+
+            if (password !== confirm) {
+                errorDiv.textContent = "Passwords do not match!";
+                errorDiv.style.display = 'flex';
+                return false; // prevent form submission
+            }
+
+            errorDiv.style.display = 'none';
+            return true;
+        }
+    </script>
+</body>
+
+</html>

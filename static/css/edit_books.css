@@ -1,0 +1,333 @@
+:root {
+    --primary: #4361ee;
+    --secondary: #3f37c9;
+    --success: #4cc9f0;
+    --danger: #f72585;
+    --warning: #f39c12;
+    --light: #f8f9fa;
+    --dark: #212529;
+    --text-light: #6c757d;
+    --border-color: #e9ecef;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.form-container {
+    width: 100%;
+    max-width: 600px;
+}
+
+.form-card {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    border-radius: 20px;
+    padding: 40px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.form-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 25px 80px rgba(0, 0, 0, 0.15);
+}
+
+.header {
+    text-align: center;
+    margin-bottom: 35px;
+}
+
+.header-icon {
+    width: 80px;
+    height: 80px;
+    background: linear-gradient(45deg, var(--primary), var(--secondary));
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 20px;
+    box-shadow: 0 8px 25px rgba(67, 97, 238, 0.3);
+}
+
+.header-icon i {
+    font-size: 36px;
+    color: white;
+}
+
+h2 {
+    color: var(--dark);
+    font-weight: 700;
+    font-size: 28px;
+    margin-bottom: 8px;
+}
+
+.subtitle {
+    color: var(--text-light);
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.book-id {
+    display: inline-block;
+    background: rgba(67, 97, 238, 0.1);
+    color: var(--primary);
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 20px;
+}
+
+.form-group {
+    margin-bottom: 25px;
+    position: relative;
+}
+
+label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: var(--dark);
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.required::after {
+    content: " *";
+    color: var(--danger);
+}
+
+.input-with-icon {
+    position: relative;
+}
+
+.input-with-icon i {
+    position: absolute;
+    left: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-light);
+    font-size: 20px;
+    z-index: 2;
+}
+
+input[type="text"],
+select {
+    width: 100%;
+    padding: 15px 15px 15px 50px;
+    border: 2px solid var(--border-color);
+    border-radius: 12px;
+    font-size: 16px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    background: rgba(255, 255, 255, 0.8);
+    color: var(--dark);
+}
+
+input:focus,
+select:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.1);
+    outline: none;
+    background: white;
+    transform: translateY(-2px);
+}
+
+select {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%236c757d' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 15px center;
+    background-size: 16px;
+}
+
+.btn-group {
+    display: flex;
+    gap: 15px;
+    margin-top: 30px;
+}
+
+.btn {
+    flex: 1;
+    padding: 15px 25px;
+    border: none;
+    border-radius: 12px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    text-decoration: none;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+}
+
+.btn-primary {
+    background: linear-gradient(45deg, var(--primary), var(--secondary));
+    color: white;
+}
+
+.btn-primary:hover {
+    background: linear-gradient(45deg, #3a56d4, #2e2ba8);
+}
+
+.btn-secondary {
+    background: rgba(108, 117, 125, 0.1);
+    color: var(--text-light);
+    border: 2px solid var(--border-color);
+}
+
+.btn-secondary:hover {
+    background: rgba(108, 117, 125, 0.2);
+    color: var(--dark);
+}
+
+.form-footer {
+    text-align: center;
+    margin-top: 25px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border-color);
+}
+
+.form-footer p {
+    color: var(--text-light);
+    font-size: 13px;
+}
+
+/* Error Message */
+.error-container {
+    text-align: center;
+    padding: 40px 20px;
+}
+
+.error-icon {
+    width: 80px;
+    height: 80px;
+    background: linear-gradient(45deg, var(--danger), #b5179e);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 20px;
+    box-shadow: 0 8px 25px rgba(247, 37, 133, 0.3);
+}
+
+.error-icon i {
+    font-size: 36px;
+    color: white;
+}
+
+.error-container h4 {
+    color: var(--dark);
+    font-weight: 700;
+    margin-bottom: 10px;
+}
+
+.error-container p {
+    color: var(--text-light);
+    margin-bottom: 25px;
+}
+
+/* Status Indicators */
+.status-indicator {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.status-available {
+    background: rgba(76, 201, 240, 0.1);
+    color: var(--success);
+}
+
+.status-issued {
+    background: rgba(247, 37, 133, 0.1);
+    color: var(--danger);
+}
+
+/* Animation for elements */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.form-card>* {
+    animation: fadeInUp 0.5s ease forwards;
+    opacity: 0;
+}
+
+.header {
+    animation-delay: 0.1s;
+}
+
+.form-group:nth-child(1) {
+    animation-delay: 0.2s;
+}
+
+.form-group:nth-child(2) {
+    animation-delay: 0.3s;
+}
+
+.form-group:nth-child(3) {
+    animation-delay: 0.4s;
+}
+
+.form-group:nth-child(4) {
+    animation-delay: 0.5s;
+}
+
+.form-group:nth-child(5) {
+    animation-delay: 0.6s;
+}
+
+.btn-group {
+    animation-delay: 0.7s;
+}
+
+/* Responsive design */
+@media (max-width: 576px) {
+    .form-card {
+        padding: 30px 25px;
+    }
+
+    .btn-group {
+        flex-direction: column;
+    }
+
+    h2 {
+        font-size: 24px;
+    }
+}

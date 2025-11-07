@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Add User - LibraryPro</title>
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@4.7.0/fonts/remixicon.css" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/add_user.css">
+</head>
+<body>
+
+    <div class="form-container">
+        <div class="form-card">
+            <div class="header">
+                <div class="header-icon">
+                    <i class="ri-user-add-line"></i>
+                </div>
+                <h2>Add New User</h2>
+                <p class="subtitle">Create a new library member account</p>
+            </div>
+
+            <form action="{{ url_for('add_user') }}" method="POST" enctype="multipart/form-data">
+                <div class="form-group">
+                    <label for="name" class="required">Full Name</label>
+                    <div class="input-with-icon">
+                        <i class="ri-user-line"></i>
+                        <input type="text" name="name" id="name" placeholder="Enter full name" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="email" class="required">Email Address</label>
+                    <div class="input-with-icon">
+                        <i class="ri-mail-line"></i>
+                        <input type="email" name="email" id="email" placeholder="Enter email address" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="id_card" class="required">ID Card Number</label>
+                    <div class="input-with-icon">
+                        <i class="ri-id-card-line"></i>
+                        <input type="text" name="id_card" id="id_card" placeholder="Enter ID card number" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="password" class="required">Password</label>
+                    <div class="input-with-icon">
+                        <i class="ri-lock-line"></i>
+                        <input type="password" name="password" id="password" placeholder="Create a password" required>
+                    </div>
+                    <div class="password-strength">
+                        <div class="strength-meter" id="password-strength-meter"></div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="avatar">Profile Picture</label>
+                    <div class="input-with-icon">
+                        <i class="ri-image-line"></i>
+                        <input type="file" name="avatar" id="avatar" accept="image/*">
+                    </div>
+                    <div class="file-info">
+                        <i class="ri-information-line"></i>
+                        Optional: JPG, PNG or GIF (Max 5MB)
+                    </div>
+                    <div class="avatar-preview" id="avatar-preview">
+                        <i class="ri-user-line"></i>
+                    </div>
+                </div>
+
+                <div class="btn-group">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="ri-user-add-line"></i> Add User
+                    </button>
+                    <a href="{{ url_for('admin_dashboard') }}" class="btn btn-secondary">
+                        <i class="ri-close-line"></i> Cancel
+                    </a>
+                </div>
+            </form>
+
+            <div class="form-footer">
+                <p>All required fields are marked with <span style="color: var(--danger);">*</span></p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Password strength indicator
+        const passwordInput = document.getElementById('password');
+        const strengthMeter = document.getElementById('password-strength-meter');
+        
+        passwordInput.addEventListener('input', function() {
+            const password = this.value;
+            let strength = 0;
+            
+            // Check password length
+            if (password.length >= 8) strength += 1;
+            
+            // Check for lowercase letters
+            if (/[a-z]/.test(password)) strength += 1;
+            
+            // Check for uppercase letters
+            if (/[A-Z]/.test(password)) strength += 1;
+            
+            // Check for numbers
+            if (/[0-9]/.test(password)) strength += 1;
+            
+            // Check for special characters
+            if (/[^A-Za-z0-9]/.test(password)) strength += 1;
+            
+            // Update strength meter
+            strengthMeter.className = 'strength-meter';
+            if (password.length === 0) {
+                strengthMeter.style.width = '0%';
+            } else if (strength <= 2) {
+                strengthMeter.classList.add('strength-weak');
+            } else if (strength <= 4) {
+                strengthMeter.classList.add('strength-medium');
+            } else {
+                strengthMeter.classList.add('strength-strong');
+            }
+        });
+
+        // Avatar preview
+        const avatarInput = document.getElementById('avatar');
+        const avatarPreview = document.getElementById('avatar-preview');
+        
+        avatarInput.addEventListener('change', function() {
+            const file = this.files[0];
+            if (file) {
+                if (file.size > 5 * 1024 * 1024) {
+                    alert('File size must be less than 5MB');
+                    this.value = '';
+                    return;
+                }
+                
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    avatarPreview.innerHTML = `<img src="${e.target.result}" alt="Avatar Preview">`;
+                }
+                reader.readAsDataURL(file);
+            } else {
+                avatarPreview.innerHTML = '<i class="ri-user-line"></i>';
+            }
+        });
+
+        // Form validation
+        const form = document.querySelector('form');
+        form.addEventListener('submit', function(e) {
+            const name = document.getElementById('name');
+            const email = document.getElementById('email');
+            const idCard = document.getElementById('id_card');
+            const password = document.getElementById('password');
+            
+            if (!name.value.trim() || !email.value.trim() || !idCard.value.trim() || !password.value.trim()) {
+                e.preventDefault();
+                alert('Please fill in all required fields.');
+                return false;
+            }
+            
+            // Email validation
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email.value)) {
+                e.preventDefault();
+                alert('Please enter a valid email address.');
+                email.focus();
+                return false;
+            }
+            
+            // Password validation
+            if (password.value.length < 6) {
+                e.preventDefault();
+                alert('Password must be at least 6 characters long.');
+                password.focus();
+                return false;
+            }
+        });
+    </script>
+</body>
+</html>

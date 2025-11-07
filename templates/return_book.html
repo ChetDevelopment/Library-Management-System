@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Return Book - LibraryPNC</title>
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@4.7.0/fonts/remixicon.css" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/static/css/return_book.css">
+</head>
+
+<body>
+    <main>
+        <div class="return-container">
+            <div class="return-card">
+                <div class="return-header">
+                    <div class="return-icon">
+                        <i class="ri-arrow-go-back-line"></i>
+                    </div>
+                    <h2>Return Book</h2>
+                    <p>Complete your borrowing cycle</p>
+                </div>
+
+                <div class="book-info">
+                    <div class="book-title">{{ book_title }}</div>
+                    <div class="date-info">
+                        <div class="date-item">
+                            <div class="date-label">
+                                <i class="ri-calendar-event-line"></i>
+                                Borrow Date
+                            </div>
+                            <div class="date-value borrow-date">{{ borrow_date }}</div>
+                        </div>
+                        <div class="date-item">
+                            <div class="date-label">
+                                <i class="ri-calendar-check-line"></i>
+                                Due Date
+                            </div>
+                            <div class="date-value due-date">{{ due_date }}</div>
+                        </div>
+                        <div class="date-item">
+                            <div class="date-label">
+                                <i class="ri-calendar-todo-line"></i>
+                                Today's Date
+                            </div>
+                            <div class="date-value today-date">{{ date_today }}</div>
+                        </div>
+                    </div>
+                    <div class="status-indicator">
+                        <i class="ri-information-line"></i>
+                        <div class="status-text">
+                            {% if is_overdue %}
+                                <strong>Status:</strong> This book is overdue. A fine may apply.
+                            {% else %}
+                                <strong>Status:</strong> This book is being returned on time.
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="alert alert-warning">
+                    <i class="ri-alert-line"></i>
+                    <div>
+                        <strong>Confirmation Required</strong><br>
+                        Are you sure you want to return this book? This action cannot be undone.
+                    </div>
+                </div>
+
+                <form method="POST" id="return-form">
+                    <button type="submit" class="btn btn-warning" id="submit-btn">
+                        <i class="ri-arrow-go-back-line"></i> Confirm Return
+                    </button>
+                    <a href="{{ url_for('dashboard') }}" class="btn btn-outline">
+                        <i class="ri-arrow-left-line"></i> Back to Dashboard
+                    </a>
+                </form>
+            </div>
+        </div>
+    </main>
+
+    <!-- Enhanced JavaScript -->
+    <script src="/static/js/return_books.js"></script>
+</body>
+
+</html>

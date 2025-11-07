@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Borrow History - LibraryPNC</title>
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@4.7.0/fonts/remixicon.css" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/borrow_history.css">
+</head>
+
+<body>
+    <main>
+        <div class="container">
+            <div class="page-header">
+                <h1 class="page-title">Borrow History</h1>
+                <div class="page-actions">
+                    <button class="btn btn-primary" id="export-csv">
+                        <i class="ri-download-line"></i> Export CSV
+                    </button>
+                    <button class="btn btn-outline" id="refresh-btn">
+                        <i class="ri-refresh-line"></i> Refresh
+                    </button>
+                </div>
+            </div>
+
+            <div class="stats-container">
+                <div class="stat-card">
+                    <div class="stat-icon primary">
+                        <i class="ri-book-open-line"></i>
+                    </div>
+                    <div class="stat-value" id="total-borrowed">
+                        {% set total_borrowed = borrow_history|length if borrow_history else 0 %}
+                        {{ total_borrowed }}
+                    </div>
+                    <div class="stat-label">Total Books Borrowed</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon success">
+                        <i class="ri-check-double-line"></i>
+                    </div>
+                    <div class="stat-value" id="books-returned">
+                        {% set returned_books = [] %}
+                        {% if borrow_history %}
+                            {% for h in borrow_history %}
+                                {% if h.return_date and h.return_date != '-' %}
+                                    {% set _ = returned_books.append(1) %}
+                                {% endif %}
+                            {% endfor %}
+                        {% endif %}
+                        {{ returned_books|length }}
+                    </div>
+                    <div class="stat-label">Books Returned</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon warning">
+                        <i class="ri-time-line"></i>
+                    </div>
+                    <div class="stat-value" id="pending-returns">
+                        {% set pending_returns = [] %}
+                        {% if borrow_history %}
+                            {% for h in borrow_history %}
+                                {% if not h.return_date or h.return_date == '-' %}
+                                    {% set _ = pending_returns.append(1) %}
+                                {% endif %}
+                            {% endfor %}
+                        {% endif %}
+                        {{ pending_returns|length }}
+                    </div>
+                    <div class="stat-label">Pending Returns</div>
+                </div>
+            </div>
+
+            <div class="table-container">
+                <div class="table-header">
+                    <h2 class="table-title">Borrow Records</h2>
+                    <div class="search-box">
+                        <i class="ri-search-line"></i>
+                        <input type="text" id="search-input" placeholder="Search books...">
+                    </div>
+                </div>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Book ID</th>
+                            <th>Title</th>
+                            <th>Borrow Date</th>
+                            <th>Due Date</th>
+                            <th>Return Date</th>
+                            <th>Status</th>
+                            <th>Fine</th>
+                        </tr>
+                    </thead>
+                    <tbody id="history-table">
+                        {% if borrow_history %}
+                            {% for h in borrow_history %}
+                                <tr>
+                                    <td>{{ h.id }}</td>
+                                    <td>{{ h.title }}</td>
+                                    <td>{{ h.borrow_date.strftime('%Y-%m-%d') if h.borrow_date else 'N/A' }}</td>
+                                    <td>{{ h.due_date.strftime('%Y-%m-%d') if h.due_date else 'N/A' }}</td>
+                                    <td>
+                                        {% if h.return_date and h.return_date != '-' %}
+                                            {{ h.return_date.strftime('%Y-%m-%d') }}
+                                        {% else %}
+                                            Not returned yet
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if h.return_date and h.return_date != '-' %}
+                                            <span class="status-badge status-returned">Returned</span>
+                                        {% else %}
+                                            <span class="status-badge status-pending">Pending</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if h.fine and h.fine > 0 %}
+                                            <span class="fine-amount">${{ h.fine }}</span>
+                                        {% else %}
+                                            <span class="fine-amount no-fine">$0</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        {% else %}
+                            <tr>
+                                <td colspan="7">
+                                    <div class="empty-state">
+                                        <i class="ri-inbox-line"></i>
+                                        <h3>No Borrow History</h3>
+                                        <p>You haven't borrowed any books yet. Visit our library to discover amazing books!</p>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+
+                <div class="pagination">
+                    <button id="prev-page" disabled>
+                        <i class="ri-arrow-left-s-line"></i>
+                    </button>
+                    <button class="active">1</button>
+                    <button>2</button>
+                    <button>3</button>
+                    <button id="next-page">
+                        <i class="ri-arrow-right-s-line"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Search functionality
+            const searchInput = document.getElementById('search-input');
+            const historyTable = document.getElementById('history-table');
+            const tableRows = historyTable.getElementsByTagName('tr');
+            
+            searchInput.addEventListener('input', function() {
+                const searchTerm = this.value.toLowerCase();
+                
+                for (let i = 0; i < tableRows.length; i++) {
+                    const row = tableRows[i];
+                    const cells = row.getElementsByTagName('td');
+                    let found = false;
+                    
+                    for (let j = 0; j < cells.length; j++) {
+                        const cellText = cells[j].textContent.toLowerCase();
+                        if (cellText.includes(searchTerm)) {
+                            found = true;
+                            break;
+                        }
+                    }
+                    
+                    if (found) {
+                        row.style.display = '';
+                    } else {
+                        row.style.display = 'none';
+                    }
+                }
+            });
+
+            // Pagination functionality
+            const prevPageBtn = document.getElementById('prev-page');
+            const nextPageBtn = document.getElementById('next-page');
+            const pageButtons = document.querySelectorAll('.pagination button:not(#prev-page):not(#next-page)');
+            
+            let currentPage = 1;
+            
+            pageButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    // Remove active class from all buttons
+                    pageButtons.forEach(btn => btn.classList.remove('active'));
+                    
+                    // Add active class to clicked button
+                    this.classList.add('active');
+                    
+                    // Update current page
+                    currentPage = parseInt(this.textContent);
+                    
+                    // Update prev/next button states
+                    updatePaginationButtons();
+                });
+            });
+            
+            prevPageBtn.addEventListener('click', function() {
+                if (currentPage > 1) {
+                    currentPage--;
+                    updateActivePageButton();
+                    updatePaginationButtons();
+                }
+            });
+            
+            nextPageBtn.addEventListener('click', function() {
+                if (currentPage < pageButtons.length) {
+                    currentPage++;
+                    updateActivePageButton();
+                    updatePaginationButtons();
+                }
+            });
+            
+            function updateActivePageButton() {
+                pageButtons.forEach(button => {
+                    button.classList.remove('active');
+                    if (parseInt(button.textContent) === currentPage) {
+                        button.classList.add('active');
+                    }
+                });
+            }
+            
+            function updatePaginationButtons() {
+                prevPageBtn.disabled = currentPage === 1;
+                nextPageBtn.disabled = currentPage === pageButtons.length;
+            }
+            
+            // Initialize pagination
+            updatePaginationButtons();
+            
+            // Refresh button functionality
+            const refreshBtn = document.getElementById('refresh-btn');
+            refreshBtn.addEventListener('click', function() {
+                this.classList.add('loading');
+                this.innerHTML = '<i class="ri-loader-4-line"></i> Refreshing...';
+                
+                // Reload the page to get updated data
+                setTimeout(() => {
+                    window.location.reload();
+                }, 1000);
+            });
+
+            // Export CSV functionality
+            const exportBtn = document.getElementById('export-csv');
+            exportBtn.addEventListener('click', function() {
+                this.classList.add('loading');
+                this.innerHTML = '<i class="ri-loader-4-line"></i> Exporting...';
+                
+                // Simulate CSV export
+                setTimeout(() => {
+                    this.classList.remove('loading');
+                    this.innerHTML = '<i class="ri-download-line"></i> Export CSV';
+                    
+                    // Create and download CSV
+                    exportToCSV();
+                }, 1500);
+            });
+
+            function exportToCSV() {
+                const rows = [];
+                const headers = ['Book ID', 'Title', 'Borrow Date', 'Due Date', 'Return Date', 'Status', 'Fine'];
+                rows.push(headers.join(','));
+
+                // Get all table rows except the empty state
+                const dataRows = document.querySelectorAll('#history-table tr:not(.empty-state)');
+                dataRows.forEach(row => {
+                    const cells = row.querySelectorAll('td');
+                    const rowData = [];
+                    cells.forEach(cell => {
+                        let text = cell.textContent.trim();
+                        // Handle status badges
+                        if (cell.querySelector('.status-badge')) {
+                            text = cell.querySelector('.status-badge').textContent.trim();
+                        }
+                        // Handle fine amounts
+                        if (cell.querySelector('.fine-amount')) {
+                            text = cell.querySelector('.fine-amount').textContent.trim();
+                        }
+                        // Escape commas and quotes for CSV
+                        text = text.replace(/"/g, '""');
+                        if (text.includes(',') || text.includes('"') || text.includes('\n')) {
+                            text = `"${text}"`;
+                        }
+                        rowData.push(text);
+                    });
+                    rows.push(rowData.join(','));
+                });
+
+                const csvContent = rows.join('\n');
+                const blob = new Blob([csvContent], { type: 'text/csv' });
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.setAttribute('hidden', '');
+                a.setAttribute('href', url);
+                a.setAttribute('download', 'borrow_history.csv');
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                
+                // Show success message
+                const originalText = exportBtn.innerHTML;
+                exportBtn.innerHTML = '<i class="ri-check-line"></i> Exported!';
+                setTimeout(() => {
+                    exportBtn.innerHTML = originalText;
+                }, 2000);
+            }
+
+            // Update statistics display
+            function updateStatistics() {
+                const totalBorrowed = document.getElementById('total-borrowed').textContent;
+                const booksReturned = document.getElementById('books-returned').textContent;
+                const pendingReturns = document.getElementById('pending-returns').textContent;
+                
+                console.log('Statistics updated:', {
+                    totalBorrowed,
+                    booksReturned,
+                    pendingReturns
+                });
+            }
+
+            // Initialize statistics
+            updateStatistics();
+        });
+    </script>

@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Edit Profile - LibraryPNC</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/static/css/edit_profile.css">
+</head>
+<body>
+    <div class="form-container">
+        <div class="form-card">
+            <div class="header">
+                <div class="header-icon">
+                    <i class="fas fa-user-edit"></i>
+                </div>
+                <h2>Edit Profile</h2>
+                <p class="subtitle">Update your personal information</p>
+            </div>
+
+            <form method="POST" enctype="multipart/form-data">
+                {{ form.hidden_tag() }}
+
+                <div class="avatar-section">
+                    <div class="avatar-preview">
+                        <img src="{{ user_avatar_url or 'https://i.pravatar.cc/150?img=12' }}" alt="User Avatar" id="avatarPreview">
+                    </div>
+                    <div class="avatar-upload">
+                        <div class="file-input-wrapper">
+                            <div class="file-input-btn">
+                                <i class="fas fa-camera"></i> Change Avatar
+                            </div>
+                            <input type="file" name="avatar" id="avatar" accept="image/*">
+                        </div>
+                        <div class="file-info">
+                            <i class="fas fa-info-circle"></i> JPG, PNG or GIF (Max 5MB)
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="name" class="required">Full Name</label>
+                    <div class="input-with-icon">
+                        <i class="fas fa-user"></i>
+                        {{ form.name(class="form-control", id="name", placeholder="Enter your full name") }}
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="email" class="required">Email Address</label>
+                    <div class="input-with-icon">
+                        <i class="fas fa-envelope"></i>
+                        {{ form.email(class="form-control", id="email", placeholder="Enter your email address") }}
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="id_card" class="required">ID Card Number</label>
+                    <div class="input-with-icon">
+                        <i class="fas fa-id-card"></i>
+                        {{ form.id_card(class="form-control", id="id_card", placeholder="Enter your ID card number") }}
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="password">New Password</label>
+                    <div class="input-with-icon">
+                        <i class="fas fa-lock"></i>
+                        {{ form.password(class="form-control", id="password", placeholder="Enter new password (optional)") }}
+                        <i class="fas fa-eye password-toggle" id="togglePassword"></i>
+                    </div>
+                    <div class="password-strength">
+                        <div class="strength-meter" id="password-strength-meter"></div>
+                    </div>
+                    <div class="file-info">
+                        <i class="fas fa-info-circle"></i> Leave blank to keep current password
+                    </div>
+                </div>
+
+                <div class="btn-group">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> Update Profile
+                    </button>
+                    <a href="{{ url_for('dashboard') }}" class="btn btn-secondary">
+                        <i class="fas fa-times-circle"></i> Cancel
+                    </a>
+                </div>
+            </form>
+
+            <div class="form-footer">
+                <p>All required fields are marked with <span style="color: var(--danger);">*</span></p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Avatar preview
+        const avatarInput = document.getElementById('avatar');
+        const avatarPreview = document.getElementById('avatarPreview');
+        
+        avatarInput.addEventListener('change', function() {
+            const file = this.files[0];
+            if (file) {
+                if (file.size > 5 * 1024 * 1024) {
+                    alert('File size must be less than 5MB');
+                    this.value = '';
+                    return;
+                }
+                
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    avatarPreview.src = e.target.result;
+                }
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // Password toggle
+        const passwordInput = document.getElementById('password');
+        const toggleIcon = document.getElementById('togglePassword');
+
+        if (passwordInput && toggleIcon) {
+            toggleIcon.addEventListener('click', () => {
+                if (passwordInput.type === 'password') {
+                    passwordInput.type = 'text';
+                    toggleIcon.classList.remove('fa-eye');
+                    toggleIcon.classList.add('fa-eye-slash');
+                } else {
+                    passwordInput.type = 'password';
+                    toggleIcon.classList.remove('fa-eye-slash');
+                    toggleIcon.classList.add('fa-eye');
+                }
+            });
+        }
+
+        // Password strength indicator
+        const strengthMeter = document.getElementById('password-strength-meter');
+        
+        if (passwordInput && strengthMeter) {
+            passwordInput.addEventListener('input', function() {
+                const password = this.value;
+                let strength = 0;
+                
+                // Check password length
+                if (password.length >= 8) strength += 1;
+                
+                // Check for lowercase letters
+                if (/[a-z]/.test(password)) strength += 1;
+                
+                // Check for uppercase letters
+                if (/[A-Z]/.test(password)) strength += 1;
+                
+                // Check for numbers
+                if (/[0-9]/.test(password)) strength += 1;
+                
+                // Check for special characters
+                if (/[^A-Za-z0-9]/.test(password)) strength += 1;
+                
+                // Update strength meter
+                strengthMeter.className = 'strength-meter';
+                if (password.length === 0) {
+                    strengthMeter.style.width = '0%';
+                } else if (strength <= 2) {
+                    strengthMeter.classList.add('strength-weak');
+                } else if (strength <= 4) {
+                    strengthMeter.classList.add('strength-medium');
+                } else {
+                    strengthMeter.classList.add('strength-strong');
+                }
+            });
+        }
+
+        // Form validation
+        const form = document.querySelector('form');
+        form.addEventListener('submit', function(e) {
+            const name = document.getElementById('name');
+            const email = document.getElementById('email');
+            const idCard = document.getElementById('id_card');
+            
+            if (!name.value.trim() || !email.value.trim() || !idCard.value.trim()) {
+                e.preventDefault();
+                alert('Please fill in all required fields.');
+                return false;
+            }
+            
+            // Email validation
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email.value)) {
+                e.preventDefault();
+                alert('Please enter a valid email address.');
+                email.focus();
+                return false;
+            }
+            
+            // Password validation (if provided)
+            if (passwordInput && passwordInput.value.trim() !== '') {
+                if (passwordInput.value.length < 6) {
+                    e.preventDefault();
+                    alert('Password must be at least 6 characters long.');
+                    passwordInput.focus();
+                    return false;
+                }
+            }
+            
+            // Show loading state
+            const submitBtn = form.querySelector('button[type="submit"]');
+            const originalText = submitBtn.innerHTML;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Updating...';
+            submitBtn.disabled = true;
+            
+            // In a real app, the form would submit here
+            // For demo, we'll revert after a delay
+            setTimeout(() => {
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
+            }, 2000);
+        });
+
+        // Pre-fill form data if available
+        document.addEventListener('DOMContentLoaded', function() {
+            // This would typically be handled by your backend template
+            // For demo purposes, we'll just ensure the form is ready
+            console.log('Edit profile form loaded');
+        });
+    </script>
+</body>
+</html>
