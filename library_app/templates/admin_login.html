@@ -1,20 +1,25 @@
+{% load static %}
+
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>LibraryPNC - Admin Login</title>
+
+    <!-- Remix Icons -->
     <link href="https://cdn.jsdelivr.net/npm/remixicon@4.7.0/fonts/remixicon.css" rel="stylesheet" />
-    <link rel="stylesheet" href="/static/css/main.css">
-    <link rel="stylesheet" href="/static/css/admin_login.css">
-    <link rel="stylesheet" href="/static/css/register.css">
+
+    <!-- CSS files -->
+    <link rel="stylesheet" href="{% static 'css/main.css' %}">
+    <link rel="stylesheet" href="{% static 'css/admin_login.css' %}">
+    <link rel="stylesheet" href="{% static 'css/register.css' %}">
 
     <!-- Face API -->
     <script defer src="https://cdn.jsdelivr.net/npm/face-api.js"></script>
 </head>
-
 <body>
+    <!-- Header -->
     <header>
         <div class="header-left">
             <h3>Library</h3>
@@ -22,45 +27,44 @@
         </div>
         <div class="header-right">
             <ul>
-                <li><i class="ri-home-4-line"></i><a href="{{ url_for('home') }}">Home</a></li>
-                <li><i class="ri-admin-line"></i><a href="{{ url_for('admin_login') }}">Admin Login</a></li>
-                <li><i class="ri-user-add-line"></i><a href="{{ url_for('register') }}">Register</a></li>
-                <li><i class="ri-login-box-line"></i><a href="{{ url_for('login') }}">Login</a></li>
+                <li><i class="ri-home-4-line"></i><a href="{% url 'home' %}">Home</a></li>
+                <li><i class="ri-admin-line"></i><a href="{% url 'admin_login' %}">Admin Login</a></li>
+                <li><i class="ri-user-add-line"></i><a href="{% url 'register' %}">Register</a></li>
+                <li><i class="ri-login-box-line"></i><a href="{% url 'login' %}">Login</a></li>
             </ul>
         </div>
     </header>
 
+    <!-- Main -->
     <main>
         <div class="login-box">
             <h2>Admin Login</h2>
 
-            <!-- Flash Messages -->
-            {% with messages = get_flashed_messages(with_categories=true) %}
+            <!-- Django Flash Messages -->
             {% if messages %}
-            <div class="flash">
-                {% for category, message in messages %}
-                <div class="alert alert-{{ category }}">{{ message }}</div>
-                {% endfor %}
-            </div>
+                <div class="flash">
+                    {% for message in messages %}
+                        <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+                    {% endfor %}
+                </div>
             {% endif %}
-            {% endwith %}
 
             <!-- Login Form -->
             <form method="POST" id="admin-login-form">
-                {{ form.hidden_tag() }}
+                {% csrf_token %}
 
-                <label for="email">{{ form.email.label }}</label><br>
-                {{ form.email(class="form-control") }}
+                <label for="email">Email</label><br>
+                <input type="email" name="email" id="email" class="form-control" required>
 
-                <label for="password">{{ form.password.label }}</label>
+                <label for="password">Password</label>
                 <div style="position: relative;">
-                    {{ form.password(class="form-control", id="password") }}
+                    <input type="password" name="password" id="password" class="form-control" required>
                     <i class="ri-eye-line" id="togglePassword"
                         style="position:absolute; right:10px; top:10px; cursor:pointer;"></i>
                 </div>
 
                 <br>
-                {{ form.submit(class="btn btn-primary") }}
+                <button type="submit" class="btn btn-primary">Login</button>
             </form>
 
             <hr>
@@ -85,5 +89,4 @@
         });
     </script>
 </body>
-
 </html>
