@@ -1,0 +1,1380 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Library Admin Dashboard</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts (Inter) -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            /* Purple shades */
+            --purple-primary: #7E57C2;
+            --purple-light: #B39DDB;
+            --purple-dark: #5E35B1;
+            --purple-bg: #EDE7F6;
+
+            /* Blue shades */
+            --blue-primary: #42A5F5;
+            --blue-light: #90CAF9;
+            --blue-dark: #1E88E5;
+            --blue-bg: #E3F2FD;
+
+            /* Yellow shades */
+            --yellow-primary: #FFCA28;
+            --yellow-light: #FFECB3;
+            --yellow-dark: #FFB300;
+            --yellow-bg: #FFFDE7;
+
+            /* Neutral colors */
+            --dark: #263238;
+            --light: #f8f9fa;
+            --gray: #78909C;
+            --border: #CFD8DC;
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            --radius: 12px;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f5f7fb;
+            color: var(--dark);
+            line-height: 1.6;
+        }
+
+        /* Sidebar Styles */
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100vh;
+            width: 260px;
+            background: linear-gradient(135deg, var(--purple-primary) 0%, var(--blue-primary) 100%);
+            color: white;
+            padding: 20px 0;
+            transition: all 0.3s ease;
+            z-index: 1000;
+            box-shadow: 4px 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .logo {
+            padding: 0 20px 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            margin-bottom: 20px;
+        }
+
+        .logo h2 {
+            font-size: 1.4rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo i {
+            color: var(--yellow-primary);
+        }
+
+        .menu {
+            list-style: none;
+            padding: 0;
+        }
+
+        .menu li {
+            margin-bottom: 5px;
+        }
+
+        .menu a {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 20px;
+            color: white;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .menu a:hover,
+        .menu li.active a {
+            background-color: rgba(255, 255, 255, 0.15);
+            border-left: 4px solid var(--yellow-primary);
+        }
+
+        .menu i {
+            width: 20px;
+            text-align: center;
+        }
+
+        /* Main Content */
+        .main-content {
+            margin-left: 260px;
+            padding: 20px;
+            transition: all 0.3s ease;
+        }
+
+        /* Header */
+        .header {
+            background: white;
+            padding: 20px;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            margin-bottom: 25px;
+        }
+
+        .header h2 {
+            font-weight: 700;
+            color: var(--purple-dark);
+            display: flex;
+            align-items: center;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 500;
+        }
+
+        .user-info img {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: 2px solid var(--purple-light);
+        }
+
+        /* Stats Cards */
+        .stats-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stats-cards .card {
+            border: none;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            padding: 20px;
+            transition: transform 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stats-cards .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+        }
+
+        .stats-cards .card:nth-child(1)::before {
+            background: linear-gradient(90deg, var(--purple-primary), var(--blue-primary));
+        }
+
+        .stats-cards .card:nth-child(2)::before {
+            background: linear-gradient(90deg, var(--blue-primary), var(--yellow-primary));
+        }
+
+        .stats-cards .card:nth-child(3)::before {
+            background: linear-gradient(90deg, var(--yellow-primary), var(--purple-primary));
+        }
+
+        .stats-cards .card:nth-child(4)::before {
+            background: linear-gradient(90deg, var(--purple-primary), var(--yellow-primary));
+        }
+
+        .stats-cards .card:nth-child(5)::before {
+            background: linear-gradient(90deg, var(--yellow-primary), var(--blue-primary));
+        }
+
+        .stats-cards .card:hover {
+            transform: translateY(-5px);
+        }
+
+        .stats-cards .card i {
+            font-size: 2rem;
+            margin-bottom: 15px;
+        }
+
+        .stats-cards .card:nth-child(1) i {
+            color: var(--purple-primary);
+        }
+
+        .stats-cards .card:nth-child(2) i {
+            color: var(--blue-primary);
+        }
+
+        .stats-cards .card:nth-child(3) i {
+            color: var(--yellow-dark);
+        }
+
+        .stats-cards .card:nth-child(4) i {
+            color: var(--purple-dark);
+        }
+
+        .stats-cards .card:nth-child(5) i {
+            color: var(--blue-dark);
+        }
+
+        .stats-cards .card h3 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin: 10px 0;
+            background: linear-gradient(135deg, var(--purple-primary) 0%, var(--blue-primary) 50%, var(--yellow-primary) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .stats-cards .card h5 {
+            color: var(--gray);
+            font-weight: 500;
+        }
+
+        /* Section Headers */
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 30px 0 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--purple-bg);
+        }
+
+        .section-header h4 {
+            font-weight: 600;
+            color: var(--purple-dark);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section-header .btn {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 500;
+        }
+
+        /* Tables */
+        .table-container {
+            background: white;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            padding: 20px;
+            margin-bottom: 30px;
+            overflow: hidden;
+        }
+
+        .table {
+            margin-bottom: 0;
+        }
+
+        .table thead {
+            background: linear-gradient(135deg, var(--purple-bg) 0%, var(--blue-bg) 100%);
+        }
+
+        .table th {
+            border-top: none;
+            font-weight: 600;
+            color: var(--purple-dark);
+            padding: 15px;
+        }
+
+        .table td {
+            padding: 15px;
+            vertical-align: middle;
+        }
+
+        .table tbody tr {
+            transition: all 0.3s ease;
+        }
+
+        .table tbody tr:hover {
+            background-color: var(--yellow-bg);
+        }
+
+        /* Status Badges */
+        .status-available {
+            background-color: var(--blue-bg);
+            color: var(--blue-dark);
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .status-issued {
+            background-color: var(--yellow-bg);
+            color: var(--yellow-dark);
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        /* Action Buttons */
+        .action-buttons {
+            display: flex;
+            gap: 5px;
+        }
+
+        .action-buttons .btn {
+            padding: 6px 10px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Badges */
+        .badge {
+            font-weight: 500;
+            padding: 6px 10px;
+        }
+
+        /* Modals */
+        .modal-header {
+            background: linear-gradient(135deg, var(--purple-bg) 0%, var(--blue-bg) 100%);
+            border-bottom: none;
+            padding: 15px 20px;
+        }
+
+        .modal-title {
+            font-weight: 600;
+            color: var(--purple-dark);
+        }
+
+        .modal-footer {
+            border-top: 1px solid var(--border);
+        }
+
+        /* Buttons */
+        .btn-primary {
+            background: linear-gradient(135deg, var(--purple-primary) 0%, var(--blue-primary) 100%);
+            border: none;
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(135deg, var(--purple-dark) 0%, var(--blue-dark) 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(126, 87, 194, 0.3);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, var(--blue-primary) 0%, var(--purple-primary) 100%);
+            border: none;
+        }
+
+        .btn-success:hover {
+            background: linear-gradient(135deg, var(--blue-dark) 0%, var(--purple-dark) 100%);
+            transform: translateY(-2px);
+        }
+
+        .btn-warning {
+            background: var(--yellow-primary);
+            border: none;
+            color: var(--dark);
+        }
+
+        .btn-warning:hover {
+            background: var(--yellow-dark);
+            transform: translateY(-2px);
+        }
+
+        .btn-outline-primary {
+            border-color: var(--purple-primary);
+            color: var(--purple-primary);
+        }
+
+        .btn-outline-primary:hover {
+            background-color: var(--purple-primary);
+            border-color: var(--purple-primary);
+            color: white;
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #f5365c, #f56036);
+            border: none;
+        }
+
+        .btn-danger:hover {
+            background: linear-gradient(135deg, #c5305c, #c55330);
+            transform: translateY(-2px);
+        }
+
+        /* Loading State */
+        .loading {
+            pointer-events: none;
+            opacity: 0.7;
+        }
+
+        /* Enhanced Reset Password Animation Styles */
+        .reset-animation {
+            display: none;
+            text-align: center;
+            padding: 20px 0;
+        }
+
+        .progress-container {
+            width: 100%;
+            height: 8px;
+            background: #f0f0f0;
+            border-radius: 4px;
+            margin: 25px 0;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .progress-bar {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, var(--purple-primary), var(--blue-primary), var(--yellow-primary));
+            border-radius: 4px;
+            transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .progress-bar::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent);
+            animation: shimmer 2s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+
+        .password-visualization {
+            display: flex;
+            justify-content: center;
+            margin: 30px 0;
+            gap: 8px;
+        }
+
+        .password-char {
+            width: 40px;
+            height: 50px;
+            background: linear-gradient(135deg, var(--purple-light), var(--blue-light));
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.3rem;
+            color: white;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .password-char::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+            transition: left 0.6s;
+        }
+
+        .password-char.revealed {
+            background: linear-gradient(135deg, var(--yellow-primary), var(--yellow-dark));
+            transform: translateY(-8px) scale(1.1);
+            box-shadow: 0 8px 25px rgba(255, 193, 7, 0.4);
+        }
+
+        .password-char.revealed::before {
+            left: 100%;
+        }
+
+        .status-text {
+            margin: 20px 0;
+            font-weight: 600;
+            color: var(--dark);
+            min-height: 28px;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+        }
+
+        .success-animation {
+            margin: 30px auto;
+            width: 100px;
+            height: 100px;
+            position: relative;
+        }
+
+        .checkmark {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            display: block;
+            stroke-width: 3;
+            stroke: #4CAF50;
+            stroke-miterlimit: 10;
+            box-shadow: inset 0 0 0 #4CAF50;
+            animation: fill .4s ease-in-out .4s forwards, scale .3s ease-in-out .9s both;
+        }
+
+        .checkmark__circle {
+            stroke-dasharray: 166;
+            stroke-dashoffset: 166;
+            stroke-width: 3;
+            stroke-miterlimit: 10;
+            stroke: #4CAF50;
+            fill: none;
+            animation: stroke 0.6s cubic-bezier(0.65, 0, 0.45, 1) forwards;
+        }
+
+        .checkmark__check {
+            transform-origin: 50% 50%;
+            stroke-dasharray: 48;
+            stroke-dashoffset: 48;
+            animation: stroke 0.3s cubic-bezier(0.65, 0, 0.45, 1) 0.8s forwards;
+        }
+
+        @keyframes stroke {
+            100% {
+                stroke-dashoffset: 0;
+            }
+        }
+
+        @keyframes scale {
+            0%, 100% {
+                transform: none;
+            }
+            50% {
+                transform: scale3d(1.1, 1.1, 1);
+            }
+        }
+
+        @keyframes fill {
+            100% {
+                box-shadow: inset 0 0 0 100px #4CAF50;
+            }
+        }
+
+        .completed-message {
+            text-align: center;
+            margin-top: 20px;
+            padding: 25px;
+            background: linear-gradient(135deg, #E8F5E9, #C8E6C9);
+            border-radius: var(--radius);
+            border-left: 5px solid #4CAF50;
+            animation: slideInUp 0.6s ease-out;
+        }
+
+        @keyframes slideInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .completed-message h5 {
+            color: #2E7D32;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .completed-message p {
+            color: #1B5E20;
+            margin-bottom: 5px;
+        }
+
+        .key-icon {
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-8px) rotate(5deg); }
+            100% { transform: translateY(0px) rotate(0deg); }
+        }
+
+        .password-display {
+            font-family: 'Courier New', monospace;
+            background: linear-gradient(135deg, #FFF9C4, #FFECB3);
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-weight: bold;
+            color: var(--dark);
+            letter-spacing: 2px;
+            margin: 15px 0;
+            border: 2px dashed var(--yellow-primary);
+            font-size: 1.2rem;
+        }
+
+        .animation-step {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 20px 0;
+            gap: 15px;
+        }
+
+        .step-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: var(--purple-bg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3rem;
+            color: var(--purple-primary);
+            transition: all 0.4s ease;
+        }
+
+        .step-icon.active {
+            background: var(--purple-primary);
+            color: white;
+            transform: scale(1.1);
+        }
+
+        .step-text {
+            flex: 1;
+            text-align: left;
+            font-weight: 500;
+        }
+
+        /* Responsive */
+        @media (max-width: 992px) {
+            .sidebar {
+                width: 70px;
+                overflow: hidden;
+            }
+
+            .sidebar .logo h2 span,
+            .sidebar .menu a span {
+                display: none;
+            }
+
+            .sidebar .menu a {
+                justify-content: center;
+                padding: 15px;
+            }
+
+            .sidebar .menu i {
+                width: auto;
+            }
+
+            .main-content {
+                margin-left: 70px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .stats-cards {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .section-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+
+            .table-container {
+                padding: 10px;
+                overflow-x: auto;
+            }
+
+            .password-char {
+                width: 35px;
+                height: 45px;
+                font-size: 1.1rem;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .stats-cards {
+                grid-template-columns: 1fr;
+            }
+
+            .main-content {
+                padding: 10px;
+                margin-left: 0;
+            }
+
+            .sidebar {
+                transform: translateX(-100%);
+            }
+
+            .sidebar.active {
+                transform: translateX(0);
+            }
+
+            .password-char {
+                width: 30px;
+                height: 40px;
+                font-size: 1rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="logo">
+            <h2><i class="fas fa-book-open"></i> <span>LibraryPN Admin</span></h2>
+        </div>
+        <ul class="menu">
+            <li class="active"><a href="{{ url_for('admin_dashboard') }}"><i class="fas fa-tachometer-alt"></i>
+                    <span>Dashboard</span></a></li>
+            <li><a href="{{ url_for('add_book') }}"><i class="fas fa-book-medical"></i> <span>Add Books</span></a></li>
+            <li><a href="{{ url_for('add_user') }}"><i class="fas fa-user-plus"></i> <span>Add User</span></a></li>
+            <li><a href="{{ url_for('borrow_requests') }}"><i class="fas fa-handshake"></i> <span>Borrow
+                        Requests</span></a></li>
+            <li><a href="{{ url_for('reports') }}"><i class="fas fa-chart-bar"></i> <span>Analytics</span></a></li>
+            <li><a href="{{ url_for('settings') }}"><i class="fas fa-cogs"></i> <span>Settings</span></a></li>
+            <li><a href="{{ url_for('admin_logout') }}"><i class="fas fa-sign-out-alt"></i> <span>Logout</span></a></li>
+        </ul>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Header -->
+        <div class="header d-flex justify-content-between align-items-center">
+            <h2 class="mb-0"><i class="fas fa-tachometer-alt me-2"></i>Admin Dashboard</h2>
+            <div class="user-info">
+                <span>Welcome, {{ admin_name }}</span>
+                <img src="https://i.pravatar.cc/150?img=12" alt="Admin Avatar">
+            </div>
+        </div>
+
+        <!-- Stats Cards -->
+        <div class="stats-cards">
+            <div class="card text-center">
+                <i class="fas fa-book"></i>
+                <h5>Total Books</h5>
+                <h3>{{ total_books }}</h3>
+            </div>
+            <div class="card text-center">
+                <i class="fas fa-book-open"></i>
+                <h5>Available Books</h5>
+                <h3>{{ available_books }}</h3>
+            </div>
+            <div class="card text-center">
+                <i class="fas fa-bookmark"></i>
+                <h5>Issued Books</h5>
+                <h3>{{ issued_books }}</h3>
+            </div>
+            <div class="card text-center">
+                <i class="fas fa-users"></i>
+                <h5>Total Members</h5>
+                <h3>{{ total_members }}</h3>
+            </div>
+            <div class="card text-center">
+                <i class="fas fa-exclamation-triangle"></i>
+                <h5>Overdue Books</h5>
+                <h3>{{ overdue_books }}</h3>
+            </div>
+        </div>
+
+        <!-- Books Section -->
+        <div class="section-header">
+            <h4><i class="fas fa-book"></i> Books Management</h4>
+            <a href="{{ url_for('add_book') }}" class="btn btn-success">
+                <i class="fas fa-plus"></i> Add New Book
+            </a>
+        </div>
+        <div class="table-container">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Title</th>
+                        <th>Author</th>
+                        <th>Category</th>
+                        <th>ISBN</th>
+                        <th>Status</th>
+                        <th>Due Date</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="books-table-body">
+                    {% for book in books %}
+                    <tr>
+                        <td><strong>#{{ book.id }}</strong></td>
+                        <td>{{ book.title }}</td>
+                        <td>{{ book.author }}</td>
+                        <td><span class="badge bg-light text-dark">{{ book.category or 'General' }}</span></td>
+                        <td><code>{{ book.isbn }}</code></td>
+                        <td>
+                            {% if book.status == 'available' %}
+                            <span class="status-available"><i class="fas fa-check-circle"></i> Available</span>
+                            {% else %}
+                            <span class="status-issued"><i class="fas fa-times-circle"></i> Issued</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ book.due_date or '-' }}</td>
+                        <td>
+                            <div class="action-buttons">
+                                <a href="{{ url_for('edit_book_page', book_id=book.id) }}"
+                                    class="btn btn-primary btn-sm">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <form action="{{ url_for('delete_book_page', book_id=book.id) }}" method="POST"
+                                    style="display:inline;">
+                                    <button type="submit" class="btn btn-danger btn-sm"
+                                        onclick="return confirm('Are you sure?')">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% if books_has_more %}
+            <div class="text-center mt-3">
+                <a id="books-see-more-btn"
+                   class="btn btn-outline-primary"
+                   href="{{ url_for('admin_dashboard') }}?books_page={{ books_page + 1 }}">
+                    See More
+                </a>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Members Section -->
+        <div class="section-header">
+            <h4><i class="fas fa-users"></i> Members Management</h4>
+            <a href="{{ url_for('add_user') }}" class="btn btn-success">
+                <i class="fas fa-user-plus"></i> Add New Member
+            </a>
+        </div>
+        <div class="table-container">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>ID Card</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="members-table-body">
+                    {% for member in members %}
+                    <tr>
+                        <td><strong>#{{ member.id }}</strong></td>
+                        <td>{{ member.name }}</td>
+                        <td>{{ member.email }}</td>
+                        <td><code>{{ member.id_card }}</code></td>
+                        <td>
+                            <div class="action-buttons">
+                                <a href="{{ url_for('edit_user', user_id=member.id) }}" class="btn btn-primary btn-sm">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <form action="{{ url_for('delete_user_page', user_id=member.id) }}" method="POST"
+                                    style="display:inline;">
+                                    <button type="submit" class="btn btn-danger btn-sm"
+                                        onclick="return confirm('Are you sure?')">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </form>
+                                <button type="button" class="btn btn-warning btn-sm" data-bs-toggle="modal"
+                                    data-bs-target="#resetModal{{ member.id }}">
+                                    <i class="fas fa-key"></i>
+                                </button>
+                            </div>
+                            <!-- Reset Password Modal with Enhanced Animation -->
+                            <div class="modal fade" id="resetModal{{ member.id }}" tabindex="-1">
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title"><i class="fas fa-key key-icon"></i> Reset Password</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <div id="reset-content-{{ member.id }}">
+                                                <p>Are you sure you want to reset password for <strong>{{ member.name }}</strong>?</p>
+                                                <p class="text-muted">Password will be reset to:</p>
+                                                <div class="password-display">user1234</div>
+                                            </div>
+                                            
+                                            <div id="reset-animation-{{ member.id }}" class="reset-animation">
+                                                <div class="animation-steps">
+                                                    <div class="animation-step">
+                                                        <div class="step-icon" id="step1-{{ member.id }}"><i class="fas fa-cog"></i></div>
+                                                        <div class="step-text">Initializing reset process...</div>
+                                                    </div>
+                                                    <div class="animation-step">
+                                                        <div class="step-icon" id="step2-{{ member.id }}"><i class="fas fa-key"></i></div>
+                                                        <div class="step-text">Generating secure password...</div>
+                                                    </div>
+                                                    <div class="animation-step">
+                                                        <div class="step-icon" id="step3-{{ member.id }}"><i class="fas fa-lock"></i></div>
+                                                        <div class="step-text">Encrypting password...</div>
+                                                    </div>
+                                                    <div class="animation-step">
+                                                        <div class="step-icon" id="step4-{{ member.id }}"><i class="fas fa-database"></i></div>
+                                                        <div class="step-text">Updating database...</div>
+                                                    </div>
+                                                </div>
+                                                
+                                                <div class="progress-container">
+                                                    <div class="progress-bar" id="progress-bar-{{ member.id }}"></div>
+                                                </div>
+                                                
+                                                <div class="password-visualization" id="password-visualization-{{ member.id }}"></div>
+                                                
+                                                <div class="status-text" id="status-text-{{ member.id }}">Preparing to reset password...</div>
+                                                
+                                                <div id="success-animation-{{ member.id }}" class="success-animation" style="display: none;">
+                                                    <svg class="checkmark" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52">
+                                                        <circle class="checkmark__circle" cx="26" cy="26" r="25" fill="none"/>
+                                                        <path class="checkmark__check" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8"/>
+                                                    </svg>
+                                                </div>
+                                                
+                                                <div id="completed-message-{{ member.id }}" class="completed-message" style="display: none;">
+                                                    <h5><i class="fas fa-check-circle"></i> Password Reset Successful!</h5>
+                                                    <p>The password has been reset to <strong>user1234</strong></p>
+                                                    <p class="mb-0">User will need to login with this new password.</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                            <button type="button" class="btn btn-warning reset-password-btn" data-member-id="{{ member.id }}">
+                                                <i class="fas fa-key"></i> Reset Password
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% if members_has_more %}
+            <div class="text-center mt-3">
+                <button id="members-see-more-btn" class="btn btn-outline-primary" data-section="members">See
+                    More</button>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Pending Requests Section -->
+        <div class="section-header">
+            <h4><i class="fas fa-handshake"></i> Pending Borrow Requests</h4>
+        </div>
+        <div class="table-container">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>User</th>
+                        <th>Book</th>
+                        <th>Urgency</th>
+                        <th>Reason</th>
+                        <th>Request Date</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="requests-table-body">
+                    {% for r in requests %}
+                    <tr>
+                        <td><strong>{{ r.user_name }}</strong></td>
+                        <td>{{ r.book_title }}</td>
+                        <td>
+                            {% if r.urgency == 'High' %}
+                            <span class="badge bg-danger">{{ r.urgency }}</span>
+                            {% elif r.urgency == 'Medium' %}
+                            <span class="badge bg-warning">{{ r.urgency }}</span>
+                            {% else %}
+                            <span class="badge bg-success">{{ r.urgency }}</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ r.reason }}</td>
+                        <td>{{ r.request_date }}</td>
+                        <td>
+                            {% if r.status == 'Pending' %}
+                            <span class="badge bg-warning">{{ r.status }}</span>
+                            {% else %}
+                            <span class="badge bg-success">{{ r.status }}</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if r.status == 'Pending' %}
+                            <div class="action-buttons">
+                                <form method="post" action="{{ url_for('approve_request', request_id=r.id) }}" style="display:inline;">
+                                    <button type="submit" class="btn btn-success btn-sm">
+                                        <i class="fas fa-check"></i> Approve
+                                    </button>
+                                </form>
+                                <form method="post" action="{{ url_for('reject_request', request_id=r.id) }}" style="display:inline;">
+                                    <button type="submit" class="btn btn-danger btn-sm">
+                                        <i class="fas fa-times"></i> Reject
+                                    </button>
+                                </form>
+                            </div>
+                            {% else %}
+                            <span class="text-muted">Completed</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% if requests_has_more %}
+            <div class="text-center mt-3">
+                <button id="requests-see-more-btn" class="btn btn-outline-primary" data-section="requests">See
+                    More</button>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Overdue Books Section -->
+        <div class="section-header">
+            <h4><i class="fas fa-clock"></i> Overdue Books & Fines</h4>
+        </div>
+        <div class="table-container">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>User Name</th>
+                        <th>Book Title</th>
+                        <th>Due Date</th>
+                        <th>Fine Amount</th>
+                    </tr>
+                </thead>
+                <tbody id="overdue-table-body">
+                    {% for overdue in overdue_info %}
+                    <tr>
+                        <td>{{ overdue.user_name }}</td>
+                        <td>{{ overdue.book_title }}</td>
+                        <td class="text-danger"><strong>{{ overdue.due_date }}</strong></td>
+                        <td class="text-danger"><strong>${{ "%.2f"|format(overdue.fine_amount) }}</strong></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% if overdue_has_more %}
+            <div class="text-center mt-3">
+                <button id="overdue-see-more-btn" class="btn btn-outline-primary" data-section="overdue">See
+                    More</button>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Bootstrap JS and Custom Script -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Animation for stats cards
+            const cards = document.querySelectorAll('.stats-cards .card');
+            cards.forEach((card, index) => {
+                card.style.animationDelay = `${index * 0.1}s`;
+            });
+
+            // Hover effects for table rows
+            function attachHoverEffects() {
+                const tableRows = document.querySelectorAll('table tbody tr');
+                tableRows.forEach(row => {
+                    row.addEventListener('mouseenter', function () {
+                        this.style.transform = 'scale(1.01)';
+                        this.style.transition = 'all 0.3s ease';
+                    });
+                    row.addEventListener('mouseleave', function () {
+                        this.style.transform = 'scale(1)';
+                    });
+                });
+            }
+            attachHoverEffects();
+
+            // Enhanced Reset Password Animation
+            document.querySelectorAll('.reset-password-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const memberId = this.getAttribute('data-member-id');
+                    startResetAnimation(memberId);
+                });
+            });
+
+            function startResetAnimation(memberId) {
+                // Get modal elements
+                const resetBtn = document.querySelector(`.reset-password-btn[data-member-id="${memberId}"]`);
+                const resetContent = document.getElementById(`reset-content-${memberId}`);
+                const resetAnimation = document.getElementById(`reset-animation-${memberId}`);
+                const progressBar = document.getElementById(`progress-bar-${memberId}`);
+                const passwordVisualization = document.getElementById(`password-visualization-${memberId}`);
+                const statusText = document.getElementById(`status-text-${memberId}`);
+                const successAnimation = document.getElementById(`success-animation-${memberId}`);
+                const completedMessage = document.getElementById(`completed-message-${memberId}`);
+                
+                // Hide original content and show animation
+                resetContent.style.display = 'none';
+                resetAnimation.style.display = 'block';
+                
+                // Disable the reset button
+                resetBtn.disabled = true;
+                resetBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Resetting...';
+                
+                // Create password visualization
+                const password = 'user1234';
+                passwordVisualization.innerHTML = '';
+                
+                for (let i = 0; i < password.length; i++) {
+                    const charElement = document.createElement('div');
+                    charElement.className = 'password-char';
+                    charElement.textContent = '*';
+                    charElement.dataset.char = password[i];
+                    passwordVisualization.appendChild(charElement);
+                }
+                
+                // Reset step icons
+                for (let i = 1; i <= 4; i++) {
+                    const stepIcon = document.getElementById(`step${i}-${memberId}`);
+                    if (stepIcon) {
+                        stepIcon.classList.remove('active');
+                    }
+                }
+                
+                // Start the animation sequence
+                let progress = 0;
+                const totalSteps = 8;
+                const stepDuration = 600; // milliseconds
+                
+                const animateStep = (step) => {
+                    if (step > totalSteps) {
+                        // Animation complete
+                        setTimeout(() => {
+                            // Show success animation
+                            successAnimation.style.display = 'block';
+                            
+                            // Show completed message after a delay
+                            setTimeout(() => {
+                                completedMessage.style.display = 'block';
+                                statusText.textContent = 'Password reset completed successfully!';
+                                
+                                // Change button to submit form
+                                setTimeout(() => {
+                                    resetBtn.disabled = false;
+                                    resetBtn.innerHTML = '<i class="fas fa-check"></i> Complete';
+                                    resetBtn.onclick = function() {
+                                        // Submit the form
+                                        const form = document.createElement('form');
+                                        form.method = 'POST';
+                                        form.action = `/reset-user-password/${memberId}`;
+                                        document.body.appendChild(form);
+                                        form.submit();
+                                    };
+                                }, 1000);
+                            }, 800);
+                        }, 500);
+                        return;
+                    }
+                    
+                    // Update progress
+                    progress = (step / totalSteps) * 100;
+                    progressBar.style.width = `${progress}%`;
+                    
+                    // Update step icons
+                    if (step <= 4) {
+                        const stepIcon = document.getElementById(`step${step}-${memberId}`);
+                        if (stepIcon) {
+                            stepIcon.classList.add('active');
+                        }
+                    }
+                    
+                    // Update status text and reveal password characters
+                    switch(step) {
+                        case 1:
+                            statusText.textContent = 'Initializing password reset process...';
+                            break;
+                        case 2:
+                            statusText.textContent = 'Generating secure random password...';
+                            break;
+                        case 3:
+                            statusText.textContent = 'Encrypting password for security...';
+                            revealPasswordChar(0);
+                            break;
+                        case 4:
+                            statusText.textContent = 'Updating user database records...';
+                            revealPasswordChar(1);
+                            revealPasswordChar(2);
+                            break;
+                        case 5:
+                            statusText.textContent = 'Securing user account access...';
+                            revealPasswordChar(3);
+                            revealPasswordChar(4);
+                            break;
+                        case 6:
+                            statusText.textContent = 'Finalizing security changes...';
+                            revealPasswordChar(5);
+                            revealPasswordChar(6);
+                            break;
+                        case 7:
+                            statusText.textContent = 'Completing reset process...';
+                            revealPasswordChar(7);
+                            break;
+                        case 8:
+                            statusText.textContent = 'Password reset successful!';
+                            break;
+                    }
+                    
+                    // Schedule next step
+                    setTimeout(() => {
+                        animateStep(step + 1);
+                    }, stepDuration);
+                };
+                
+                // Helper function to reveal password characters
+                function revealPasswordChar(index) {
+                    if (index < passwordVisualization.children.length) {
+                        const charElement = passwordVisualization.children[index];
+                        setTimeout(() => {
+                            charElement.textContent = charElement.dataset.char;
+                            charElement.classList.add('revealed');
+                        }, 300);
+                    }
+                }
+                
+                // Start the animation
+                animateStep(1);
+            }
+
+            // "See More" button functionality
+            const seeMoreButtons = document.querySelectorAll('.btn[data-section]');
+            const pageTrackers = { books: 1, members: 1, requests: 1, overdue: 1 };
+
+            seeMoreButtons.forEach(button => {
+                button.addEventListener('click', async () => {
+                    const section = button.dataset.section;
+                    const tableBody = document.getElementById(`${section}-table-body`);
+                    pageTrackers[section]++;
+                    button.classList.add('loading');
+                    button.innerHTML = 'Loading...';
+
+                    try {
+                        const response = await fetch(`/api/${section}?page=${pageTrackers[section]}`);
+                        const data = await response.json();
+
+                        data.items.forEach(item => {
+                            let row = '';
+                            if (section === 'books') {
+                                row = `
+                            <tr>
+                                <td><strong>#${item.id}</strong></td>
+                                <td>${item.title}</td>
+                                <td>${item.author}</td>
+                                <td><span class="badge bg-light text-dark">${item.category || 'General'}</span></td>
+                                <td><code>${item.isbn}</code></td>
+                                <td>
+                                    ${item.status === 'available'
+                                        ? '<span class="status-available"><i class="fas fa-check-circle"></i> Available</span>'
+                                        : '<span class="status-issued"><i class="fas fa-times-circle"></i> Issued</span>'}
+                                </td>
+                                <td>${item.due_date || '-'}</td>
+                                <td>
+                                    <div class="action-buttons">
+                                        <a href="/edit_book/${item.id}" class="btn btn-primary btn-sm"><i class="fas fa-edit"></i></a>
+                                        <form action="/delete_book/${item.id}" method="POST" style="display:inline;">
+                                            <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure?')"><i class="fas fa-trash"></i></button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>`;
+                            } else if (section === 'members') {
+                                row = `
+                            <tr data-member-id="${item.id}">
+                                <td><strong>#${item.id}</strong></td>
+                                <td>${item.name}</td>
+                                <td>${item.email}</td>
+                                <td><code>${item.id_card}</code></td>
+                                <td>
+                                    <div class="action-buttons">
+                                        <a href="/edit_user/${item.id}" class="btn btn-primary btn-sm"><i class="fas fa-edit"></i></a>
+                                        <form action="/delete_user/${item.id}" method="POST" style="display:inline;">
+                                            <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure?')"><i class="fas fa-trash"></i></button>
+                                        </form>
+                                        <button type="button" class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#resetModal${item.id}"><i class="fas fa-key"></i></button>
+                                    </div>
+                                </td>
+                            </tr>`;
+                            } else if (section === 'requests') {
+                                row = `
+                            <tr>
+                                <td><strong>${item.user_name}</strong></td>
+                                <td>${item.book_title}</td>
+                                <td>
+                                    ${item.urgency === 'High'
+                                        ? '<span class="badge bg-danger">High</span>'
+                                        : item.urgency === 'Medium'
+                                            ? '<span class="badge bg-warning">Medium</span>'
+                                            : '<span class="badge bg-success">Low</span>'}
+                                </td>
+                                <td>${item.reason}</td>
+                                <td>${item.request_date}</td>
+                                <td>
+                                    ${item.status === 'Pending'
+                                        ? '<span class="badge bg-warning">Pending</span>'
+                                        : '<span class="badge bg-success">Completed</span>'}
+                                </td>
+                                <td>
+                                    ${item.status === 'Pending'
+                                        ? `<div class="action-buttons">
+                                            <a href="/admin/approve-request/${item.id}" class="btn btn-success btn-sm"><i class="fas fa-check"></i> Approve</a>
+                                            <a href="/admin/reject-request/${item.id}" class="btn btn-danger btn-sm"><i class="fas fa-times"></i> Reject</a>
+                                        </div>`
+                                        : '<span class="text-muted">Completed</span>'}
+                                </td>
+                            </tr>`;
+                            } else if (section === 'overdue') {
+                                row = `
+                            <tr>
+                                <td>${item.user_name}</td>
+                                <td>${item.book_title}</td>
+                                <td class="text-danger"><strong>${item.due_date}</strong></td>
+                                <td class="text-danger"><strong>$${item.fine_amount.toFixed(2)}</strong></td>
+                            </tr>`;
+                            }
+                            tableBody.insertAdjacentHTML('beforeend', row);
+                        });
+
+                        if (!data.has_more) button.style.display = 'none';
+                        attachHoverEffects();
+                    } catch (error) {
+                        console.error('Error loading more items:', error);
+                        alert('Failed to load more items. Please try again.');
+                    } finally {
+                        button.classList.remove('loading');
+                        button.innerHTML = 'See More';
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>

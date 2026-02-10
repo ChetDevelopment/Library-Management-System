@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Library MS - Dashboard User</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/static/css/dashboard.css">
+</head>
+
+<body>
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="logo">
+            <h2><i class="fas fa-book-open"></i> LibraryPN</h2>
+        </div>
+        <ul class="menu">
+            <li class="active"><a href="{{ url_for('dashboard') }}"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
+            <li><a href="{{ url_for('books') }}"><i class="fas fa-book"></i> Books</a></li>
+            <li><a href="{{ url_for('borrowed_books') }}"><i class="fas fa-share-square"></i> Borrow/Return</a></li>
+            <li><a href="{{ url_for('borrow_history') }}"><i class="fas fa-history"></i> Borrow History</a></li>
+            <li><a href="{{ url_for('notifications') }}"><i class="fas fa-bell"></i> Notifications</a></li>
+            <li><a href="{{ url_for('view_profile') }}"><i class="fas fa-user"></i> Profile</a></li>
+            <li><a href="{{ url_for('logout') }}"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+        </ul>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <div class="header">
+            <h2><i class="fas fa-tachometer-alt"></i> Dashboard</h2>
+            <div class="user-info">
+                <span>Welcome, {{ user[0] }}</span>
+                <img src="{{ user_avatar_url }}" alt="User Avatar">
+            </div>
+        </div>
+
+        <!-- Stats Cards -->
+        <div class="stats-cards">
+            <div class="card">
+                <i class="fas fa-book"></i>
+                <h5>Total Books</h5>
+                <h3>{{ total_books }}</h3>
+            </div>
+            <div class="card">
+                <i class="fas fa-check-circle"></i>
+                <h5>Available Books</h5>
+                <h3>{{ available_books }}</h3>
+            </div>
+            <div class="card">
+                <i class="fas fa-share-square"></i>
+                <h5>Issued Books</h5>
+                <h3>{{ issued_books }}</h3>
+            </div>
+            <div class="card">
+                <i class="fas fa-exclamation-triangle"></i>
+                <h5>Overdue Books</h5>
+                <h3>{{ overdue_books }}</h3>
+            </div>
+            <div class="card">
+                <i class="fas fa-wallet"></i>
+                <h5>Fines / Balance</h5>
+                <h3>${{ user_fines }}</h3>
+            </div>
+            <div class="card">
+                <i class="fas fa-hand-paper"></i>
+                <h5>My Requests</h5>
+                <h3>{{ request_count }}</h3>
+            </div>
+        </div>
+
+        <!-- Upcoming Due Dates -->
+
+        <!-- Tabs Container -->
+        <div class="tabs-container">
+            <!-- Tabs Navigation -->
+            <div class="tabs">
+                <button class="tab-btn active" data-tab="search"><i class="fas fa-search"></i> Search Books</button>
+                <button class="tab-btn" data-tab="borrowed"><i class="fas fa-share-square"></i> Borrowed</button>
+                <button class="tab-btn" data-tab="history"><i class="fas fa-history"></i> History</button>
+                <button class="tab-btn" data-tab="requests"><i class="fas fa-hand-paper"></i> My Requests</button>
+                <button class="tab-btn" data-tab="notifications"><i class="fas fa-bell"></i> Notifications</button>
+            </div>
+
+            <!-- Tab Contents -->
+            <div id="search" class="tab-content active">
+                <h4>Search Books</h4>
+                <form method="GET" action="{{ url_for('dashboard') }}" class="mb-4">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <input type="text" name="query" class="form-control" placeholder="Search by title, author, category, ISBN">
+                        </div>
+                        <button type="submit" class="btn btn-primary"><i class="fas fa-search"></i> Search</button>
+                    </div>
+                </form>
+                
+                {% if search_results %}
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Title</th>
+                                <th>Author</th>
+                                <th>Category</th>
+                                <th>ISBN</th>
+                                <th>Availability</th>
+                                <th>Copies</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for book in search_results %}
+                            <tr>
+                                <td>{{ book.title }}</td>
+                                <td>{{ book.author }}</td>
+                                <td>{{ book.category }}</td>
+                                <td>{{ book.isbn }}</td>
+                                <td>
+                                    {% if book.status == 'Available' %}
+                                    <span class="status-badge status-available">Available</span>
+                                    {% else %}
+                                    <span class="status-badge status-unavailable">Unavailable</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ book.copies }}</td>
+                                <td>
+                                    <div class="action-buttons">
+                                        {% if book.status == 'Available' %}
+                                        <a href="{{ url_for('borrow_form', book_id=book.id) }}" class="btn btn-primary btn-sm">
+                                            <i class="fas fa-share-square"></i> Borrow
+                                        </a>
+                                        {% else %}
+                                        <button class="btn btn-warning btn-sm borrow-request-btn" 
+                                                data-book-id="{{ book.id }}"
+                                                data-book-title="{{ book.title }}" 
+                                                data-book-author="{{ book.author }}">
+                                            <i class="fas fa-hand-paper"></i> Request
+                                        </button>
+                                        {% endif %}
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% endif %}
+            </div>
+
+            <div id="borrowed" class="tab-content">
+                <h4>Currently Borrowed Books</h4>
+                {% if borrowed_books %}
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Title</th>
+                                <th>Borrow Date</th>
+                                <th>Due Date</th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for b in borrowed_books %}
+                            <tr>
+                                <td>{{ b.title }}</td>
+                                <td>{{ b.borrow_date }}</td>
+                                <td>{{ b.due_date }}</td>
+                                <td>{{ b.status }}</td>
+                                <td>
+                                    <div class="action-buttons">
+                                        <a href="/return-book/{{ b.borrow_id }}" class="btn btn-warning btn-sm">
+                                            <i class="fas fa-undo"></i> Return
+                                        </a>
+                                        <a href="/renew-book/{{ b.book_id }}" class="btn btn-success btn-sm">
+                                            <i class="fas fa-sync-alt"></i> Renew
+                                        </a>
+
+                                        <!-- Pay Fine Button (only if fine > 0) -->
+                                        {% if b.fine|default(0) > 0 %}
+                                        <button class="btn btn-danger btn-sm pay-fine-btn" 
+                                                data-borrow-id="{{ b.id }}"
+                                                data-fine="{{ b.fine }}">
+                                            <i class="fas fa-wallet"></i> Pay Fine ${{ b.fine }}
+                                        </button>
+                                        {% endif %}
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <p class="text-center text-muted py-4">You don't have any borrowed books at the moment.</p>
+                {% endif %}
+            </div>
+
+            <div id="history" class="tab-content">
+                <h4>Borrow History</h4>
+                {% if borrow_history %}
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Title</th>
+                                <th>Borrow Date</th>
+                                <th>Return Date</th>
+                                <th>Fines Paid</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for h in borrow_history %}
+                            <tr>
+                                <td>{{ h.title }}</td>
+                                <td>{{ h.borrow_date }}</td>
+                                <td>{{ h.return_date }}</td>
+                                <td>${{ h.fine }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <p class="text-center text-muted py-4">No borrow history available.</p>
+                {% endif %}
+            </div>
+
+            <!-- Borrow Requests Tab -->
+            <div id="requests" class="tab-content">
+                <h4>Submit Borrow Request to Admin</h4>
+
+                <!-- Request Form -->
+                <div class="request-form-container">
+                    <h4><i class="fas fa-edit"></i> New Borrow Request</h4>
+                    <form method="POST" action="/submit-borrow-request">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="book_title">Book Title *</label>
+                                <input type="text" id="book_title" name="book_title" class="form-control" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="author">Author *</label>
+                                <input type="text" id="author" name="author" class="form-control" required>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="isbn">ISBN</label>
+                                <input type="text" id="isbn" name="isbn" class="form-control">
+                            </div>
+                            <div class="form-group">
+                                <label for="category">Category</label>
+                                <select id="category" name="category" class="form-control">
+                                    <option value="">Select Category</option>
+                                    <option value="Fiction">Fiction</option>
+                                    <option value="Non-Fiction">Non-Fiction</option>
+                                    <option value="Science">Science</option>
+                                    <option value="Technology">Technology</option>
+                                    <option value="History">History</option>
+                                    <option value="Biography">Biography</option>
+                                    <option value="Literature">Literature</option>
+                                    <option value="Art">Art</option>
+                                    <option value="Other">Other</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="urgency">Urgency Level</label>
+                                <select id="urgency" name="urgency" class="form-control">
+                                    <option value="Low">Low</option>
+                                    <option value="Medium" selected>Medium</option>
+                                    <option value="High">High</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="needed_by">Needed By Date</label>
+                                <input type="date" id="needed_by" name="needed_by" class="form-control">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="reason">Reason for Request *</label>
+                            <textarea id="reason" name="reason" class="form-control"
+                                placeholder="Please explain why you need this book..." required></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="notes">Additional Notes</label>
+                            <textarea id="notes" name="notes" class="form-control"
+                                placeholder="Any additional information that might help..."></textarea>
+                        </div>
+
+                        <button type="submit" class="submit-btn">
+                            <i class="fas fa-paper-plane"></i> Submit Request to Admin
+                        </button>
+                    </form>
+                </div>
+
+                <h4>My Previous Requests</h4>
+                {% if borrow_requests %}
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Book Title</th>
+                                <th>Author</th>
+                                <th>Request Date</th>
+                                <th>Urgency</th>
+                                <th>Status</th>
+                                <th>Admin Response</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for request in borrow_requests %}
+                            <tr>
+                                <td>{{ request.book_title }}</td>
+                                <td>{{ request.author }}</td>
+                                <td>{{ request.request_date }}</td>
+                                <td>
+                                    {% if request.urgency == 'High' %}
+                                    <span style="color: #dc3545; font-weight: bold;">{{ request.urgency }}</span>
+                                    {% elif request.urgency == 'Medium' %}
+                                    <span style="color: #ffc107; font-weight: bold;">{{ request.urgency }}</span>
+                                    {% else %}
+                                    <span style="color: #28a745; font-weight: bold;">{{ request.urgency }}</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if request.status == 'Pending' %}
+                                    <span class="status-badge status-pending">Pending</span>
+                                    {% elif request.status == 'Approved' %}
+                                    <span class="status-badge status-approved">Approved</span>
+                                    {% elif request.status == 'Rejected' %}
+                                    <span class="status-badge status-rejected">Rejected</span>
+                                    {% else %}
+                                    <span>{{ request.status }}</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ request.admin_response or 'No response yet' }}</td>
+                                <td>
+                                    {% if request.status == 'Pending' %}
+                                    <button class="btn btn-danger btn-sm cancel-request-btn" data-request-id="{{ request.id }}">
+                                        <i class="fas fa-times"></i> Cancel
+                                    </button>
+                                    {% elif request.status == 'Approved' %}
+                                    <a href="/collect-book/{{ request.id }}" class="btn btn-success btn-sm">
+                                        <i class="fas fa-check"></i> Collect
+                                    </a>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <p class="text-center text-muted py-4">No borrow requests found.</p>
+                {% endif %}
+            </div>
+
+            <div id="notifications" class="tab-content">
+                <h4>Notifications</h4>
+                {% if notifications %}
+                <div class="table-container">
+                    <ul class="notifications-list">
+                        {% for n in notifications %}
+                        <li>
+                            {% if not n[2] %}
+                            <strong><i class="fas fa-bell text-primary"></i> {{ n[1] }} - {{ n[3] }}</strong>
+                            {% else %}
+                            <i class="fas fa-bell text-muted"></i> {{ n[1] }} - {{ n[3] }}
+                            {% endif %}
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                {% else %}
+                <p class="text-center text-muted py-4">No notifications</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Pay Fine Modal -->
+    <div id="payFineModal" class="modal">
+        <div class="modal-content">
+            <h3><i class="fas fa-wallet text-danger"></i> Pay Fine</h3>
+            <p id="fineAmountText" class="text-center mb-3"></p>
+            <form method="POST" id="payFineForm">
+                <div class="form-group">
+                    <input type="number" name="amount" id="fineAmountInput" min="0" step="0.01" required>
+                </div>
+                <div class="action-buttons">
+                    <button type="submit" class="btn btn-danger">Pay Now</button>
+                    <button type="button" class="btn btn-secondary" id="cancelPayFine">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Borrow Request Modal (for unavailable books) -->
+    <div id="borrowRequestModal" class="modal">
+        <div class="modal-content">
+            <h3><i class="fas fa-hand-paper text-primary"></i> Borrow Request</h3>
+            <div class="book-info mb-3 p-3 bg-light rounded">
+                <h5 id="requestBookTitle" class="text-primary"></h5>
+                <p><strong>Author:</strong> <span id="requestBookAuthor"></span></p>
+            </div>
+            <p class="mb-3">This book is currently unavailable. You can submit a borrow request to the admin.</p>
+            <form method="POST" id="borrowRequestForm">
+                <input type="hidden" id="requestBookId" name="book_id">
+                <div class="form-group">
+                    <label for="requestUrgency">Urgency Level:</label>
+                    <select id="requestUrgency" name="urgency" class="form-control">
+                        <option value="Low">Low</option>
+                        <option value="Medium" selected>Medium</option>
+                        <option value="High">High</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="requestReason">Reason for Request:</label>
+                    <textarea id="requestReason" name="reason" class="form-control" rows="3"
+                        placeholder="Why do you need this book?" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="requestNotes">Additional Notes:</label>
+                    <textarea id="requestNotes" name="notes" class="form-control" rows="2"
+                        placeholder="Any additional information..."></textarea>
+                </div>
+                <div class="action-buttons">
+                    <button type="submit" class="btn btn-primary">Submit Request to Admin</button>
+                    <button type="button" class="btn btn-secondary" id="cancelBorrowRequest">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Tabs functionality
+        const tabButtons = document.querySelectorAll('.tab-btn');
+        const tabContents = document.querySelectorAll('.tab-content');
+        
+        tabButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                tabButtons.forEach(b => b.classList.remove('active'));
+                tabContents.forEach(c => c.classList.remove('active'));
+                btn.classList.add('active');
+                document.getElementById(btn.dataset.tab).classList.add('active');
+            });
+        });
+
+        // Pay Fine Modal
+        const payFineButtons = document.querySelectorAll('.pay-fine-btn');
+        const payFineModal = document.getElementById('payFineModal');
+        const fineAmountText = document.getElementById('fineAmountText');
+        const fineAmountInput = document.getElementById('fineAmountInput');
+        const payFineForm = document.getElementById('payFineForm');
+        const cancelPayFineBtn = document.getElementById('cancelPayFine');
+
+        payFineButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const borrowId = btn.dataset.borrowId;
+                const fine = btn.dataset.fine;
+                fineAmountText.textContent = `Fine Amount: $${fine}`;
+                fineAmountInput.value = fine;
+                fineAmountInput.min = fine;
+                payFineForm.action = `/pay-fine/${borrowId}`;
+                payFineModal.style.display = 'flex';
+            });
+        });
+
+        cancelPayFineBtn.addEventListener('click', () => {
+            payFineModal.style.display = 'none';
+        });
+
+        // Borrow Request Modal
+        const borrowRequestButtons = document.querySelectorAll('.borrow-request-btn');
+        const borrowRequestModal = document.getElementById('borrowRequestModal');
+        const requestBookTitle = document.getElementById('requestBookTitle');
+        const requestBookAuthor = document.getElementById('requestBookAuthor');
+        const requestBookId = document.getElementById('requestBookId');
+        const borrowRequestForm = document.getElementById('borrowRequestForm');
+        const cancelBorrowRequestBtn = document.getElementById('cancelBorrowRequest');
+
+        borrowRequestButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const bookId = btn.dataset.bookId;
+                const bookTitle = btn.dataset.bookTitle;
+                const bookAuthor = btn.dataset.bookAuthor;
+
+                requestBookTitle.textContent = bookTitle;
+                requestBookAuthor.textContent = bookAuthor;
+                requestBookId.value = bookId;
+
+                borrowRequestForm.action = `/submit-borrow-request/${bookId}`;
+                borrowRequestModal.style.display = 'flex';
+            });
+        });
+
+        cancelBorrowRequestBtn.addEventListener('click', () => {
+            borrowRequestModal.style.display = 'none';
+        });
+
+        // Cancel Request Buttons
+        const cancelRequestButtons = document.querySelectorAll('.cancel-request-btn');
+        cancelRequestButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const requestId = btn.dataset.requestId;
+                if (confirm('Are you sure you want to cancel this borrow request?')) {
+                    window.location.href = `/cancel-borrow-request/${requestId}`;
+                }
+            });
+        });
+
+        // Set minimum date for needed_by field to today
+        const neededByInput = document.getElementById('needed_by');
+        if (neededByInput) {
+            const today = new Date().toISOString().split('T')[0];
+            neededByInput.min = today;
+        }
+
+        // Close modals when clicking outside
+        window.onclick = function (event) {
+            if (event.target == payFineModal) payFineModal.style.display = 'none';
+            if (event.target == borrowRequestModal) borrowRequestModal.style.display = 'none';
+        }
+
+        // Add some animations to stats cards
+        document.addEventListener('DOMContentLoaded', function() {
+            const cards = document.querySelectorAll('.stats-cards .card');
+            cards.forEach((card, index) => {
+                card.style.animationDelay = `${index * 0.1}s`;
+            });
+        });
+    </script>
+</body>
+
+</html>
